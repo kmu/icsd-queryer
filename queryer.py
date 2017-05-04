@@ -3,7 +3,9 @@ import os
 import shutil
 import json
 import time
+
 from selenium import webdriver
+
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
 class Error(Exception):
