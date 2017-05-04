@@ -242,7 +242,7 @@ class Queryer:
             # write the parsed data into a JSON file in the directory
             json_file = os.path.join(coll_code, 'meta_data.json')
             with open(json_file, 'w') as fw:
-                json.dump(entry_data, fw)
+                json.dump(entry_data, fw, indent=2)
 
             # save the screenshot the current page into the directory
             screenshot_file = os.path.join(coll_code, 'screenshot.png')
