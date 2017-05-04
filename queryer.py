@@ -4,7 +4,6 @@ import shutil
 import json
 import time
 from selenium import webdriver
-import pyvirtualdisplay as pyvd
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
 class Error(Exception):
@@ -43,7 +42,6 @@ class Queryer:
         Attributes:
             url: URL of the search page
             query: query to be posted to the webform (see kwargs)
-            virt_display: Display object from pyvirtualdisplay
             browser_data_dir: directory for browser user profile, related data
             driver: instance of Selenium WebDriver running PhantomJS
             hits: number of search hits for the query
@@ -52,7 +50,6 @@ class Queryer:
         self.query = query
         sys.stdout.write('Initializing a WebDriver...\n')
         sys.stdout.flush()
-        self.virt_display = None
         self.driver = self._initialize_driver()
         sys.stdout.write('done.\n')
         sys.stdout.flush()
@@ -64,8 +61,6 @@ class Queryer:
         self.hits = 0
 
     def _initialize_driver(self):
-        self.virt_display = pyvd.Display(visible=0, size=(1600, 900))
-        self.virt_display.start()
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
         if os.path.exists(browser_data_dir):
             shutil.rmtree(browser_data_dir, ignore_errors=True)
@@ -846,7 +841,6 @@ class Queryer:
     def quit(self):
         self.driver.stop_client()
         self.driver.quit()
-        self.virt_display.stop()
 
     def perform_icsd_query(self):
         """
