@@ -254,7 +254,9 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        self.driver.find_element_by_id('LVDetailed').click()
+        element = self.driver.find_element_by_id('display_form:btnEntryViewDetailed')
+        self.driver.execute_script("arguments[0].click();", element)
+        # self.driver.find_element_by_id('display_form:btnEntryViewDetailed').click()
         self._check_detailed_view()
         self._expand_all()
 
