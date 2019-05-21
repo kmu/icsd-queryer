@@ -277,7 +277,9 @@ class Queryer(object):
         self.driver.execute_script("arguments[0].click();", element)
         self.wait_for_ajax()
         self._check_detailed_view()
+        self.wait_for_ajax()
         self._expand_all()
+        self.wait_for_ajax()
 
     def _check_detailed_view(self):
         """
@@ -305,19 +307,29 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        element = self.driver.find_element_by_id(
-            'display_form:listViewTable:uiSelectAllRows')
+        self.wait_for_ajax()
+        time.sleep(10)
+        # element = self.driver.find_element_by_id(
+            # 'display_form:listViewTable:uiSelectAllRows')
+        element = self.driver.find_element_by_xpath("//span[contains(.,'Show Detailed View')]")
+        self.wait_for_ajax()
+        time.sleep(10)
         self.driver.execute_script("arguments[0].click();", element)
+        time.sleep(10)
+        self.wait_for_ajax()
 
     def _get_number_of_entries_loaded(self):
         """
+        Load the number of entries from details.xhtml.
         Use By.CLASS_NAME to locate 'title' elements, split the element text
         with 'Detailed View' in it and return the last item in the list.
         """
         titles = self.driver.find_elements_by_id('display_main')
         for title in titles:
+            from icecream import ic
+            ic(title.text)
             if 'Detailed View' in title.text:
-                n_entries_loaded = int(title.text.split()[6])
+                n_entries_loaded = int(title.text.split()[5])
                 return n_entries_loaded
 
     def parse_entries(self):
