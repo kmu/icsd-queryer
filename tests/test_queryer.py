@@ -20,8 +20,10 @@ class TestQueryer(unittest.TestCase):
         queryer = Queryer(query=query)
         parsed_entries = queryer.perform_icsd_query()
         print(parsed_entries)
-        print(queryer.hits)
+        self.assertEqual(7, queryer.hits)
         queryer.quit()
+
+
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_AlOF(self):
@@ -31,3 +33,4 @@ class TestQueryer(unittest.TestCase):
         }
         queryer = Queryer(query=query, structure_source='theory')
         queryer.perform_icsd_query()
+        self.assertEqual(3, queryer.hits)

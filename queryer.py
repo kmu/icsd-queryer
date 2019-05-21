@@ -224,13 +224,12 @@ class Queryer(object):
         Parse element text to get number of hits for the current query
         (last item when text is split), assign to `self.hits`.
         """
-        from icecream import ic
         try:
             title = self.driver.find_element_by_id('display_main')
         except Exception as e:
             self.quit()
             print("Original error: {}".format(e))
-            error_message= 'No hits/too many hits. Modify your query.'
+            error_message = 'No hits/too many hits. Modify your query.'
             raise QueryerError(error_message)
         else:
             if 'List View' not in title.text:
@@ -238,7 +237,7 @@ class Queryer(object):
                 error_message = 'Failed to load "List View" of results'
                 raise QueryerError(error_message)
             else:
-                self.hits = int(title.text.split()[-1])
+                self.hits = int(title.text.split()[6])
                 sys.stdout.write('The query yielded ')
                 sys.stdout.write('{} hits.\n'.format(self.hits))
                 sys.stdout.flush()
