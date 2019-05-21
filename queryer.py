@@ -301,7 +301,8 @@ class Queryer(object):
             titles = self.driver.find_elements_by_id('display_main')
         except Exception as e:
             self.quit()
-            error_message = 'Failed to load "Detailed View" of results.'
+            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(
+                e)
             raise QueryerError(error_message)
 
         else:
@@ -322,8 +323,7 @@ class Queryer(object):
     def _get_number_of_entries_loaded(self):
         """
         Load the number of entries from details.xhtml.
-        Use By.CLASS_NAME to locate 'display_main' elements,
-        split the element text
+        Use By.CLASS_NAME to locate 'display_main' elements, split the element text
         with 'Detailed View' in it and return the last item in the list.
         """
         titles = self.driver.find_elements_by_id('display_main')
