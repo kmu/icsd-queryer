@@ -4,3 +4,4 @@
 *.ti
 browser_data
 docs*
+.coverage
