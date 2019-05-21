@@ -246,7 +246,8 @@ class Queryer(object):
         """
         Use By.ID to locate the 'Select All' ('LVSelect') button, and click it.
         """
-        self.driver.find_element_by_id('LVSelect').click()
+        element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows')
+        self.driver.execute_script("arguments[0].click();", element)
 
     def _click_show_detailed_view(self):
         """
