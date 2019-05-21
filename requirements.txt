@@ -1,3 +1,4 @@
 PyYAML==3.12
 selenium==3.0.2
 nose
+coverage
