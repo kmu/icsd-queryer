@@ -4,6 +4,7 @@ from queryer import Queryer
 import unittest
 
 
+
 class TestQueryer(unittest.TestCase):
     def test_NiTi(self):
         query = {
@@ -12,6 +13,7 @@ class TestQueryer(unittest.TestCase):
         }
         ##query = {'icsd_collection_code': 181801}
         queryer = Queryer(query=query)
-        queryer.perform_icsd_query()
-        # print queryer.hits
-        # queryer.quit()
+        parsed_entries = queryer.perform_icsd_query()
+        print(parsed_entries)
+        print(queryer.hits)
+        queryer.quit()
