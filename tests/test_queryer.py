@@ -1,9 +1,8 @@
-import sys, os
+import unittest
+import sys
+import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from queryer import Queryer
-import unittest
-
-
 
 class TestQueryer(unittest.TestCase):
     def test_NiTi(self):
@@ -22,7 +21,6 @@ class TestQueryer(unittest.TestCase):
         query = {
             'composition': 'Al O F',
             'number_of_elements': '3'
-            }
+        }
         queryer = Queryer(query=query, structure_source='theory')
         queryer.perform_icsd_query()
-
