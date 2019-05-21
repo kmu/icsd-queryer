@@ -3,6 +3,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from queryer import Queryer
 import unittest
 
+<<<<<<< HEAD
 
 
 class TestQueryer(unittest.TestCase):
@@ -17,3 +18,11 @@ class TestQueryer(unittest.TestCase):
         print(parsed_entries)
         print(queryer.hits)
         queryer.quit()
+=======
+query = {
+    'composition': 'Al O F',
+    'number_of_elements': '3'
+    }
+queryer = queryer.Queryer(query=query, structure_source='theory')
+queryer.perform_icsd_query()
+>>>>>>> hegdevinayi/master
