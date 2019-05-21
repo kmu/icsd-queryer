@@ -286,7 +286,9 @@ class Queryer(object):
         Use By.CSS_SELECTOR to locate the 'Expand All' ('a#ExpandAll.no_print')
         button, and click it.
         """
-        self.driver.find_element_by_css_selector('a#ExpandAll.no_print').click()
+        # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
+        element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows')
+        self.driver.execute_script("arguments[0].click();", element)
 
     def _get_number_of_entries_loaded(self):
         """
