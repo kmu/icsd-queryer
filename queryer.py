@@ -224,10 +224,12 @@ class Queryer(object):
         Parse element text to get number of hits for the current query
         (last item when text is split), assign to `self.hits`.
         """
+        from icecream import ic
         try:
             title = self.driver.find_element_by_id('display_main')
-        except:
+        except Exception as e:
             self.quit()
+            print("Original error: {}".format(e))
             error_message= 'No hits/too many hits. Modify your query.'
             raise QueryerError(error_message)
         else:
