@@ -10,18 +10,18 @@ is_mac = platform.system() == 'Darwin'
 
 
 class TestQueryer(unittest.TestCase):
-    @unittest.skipIf(not is_mac, "Use macOS to run this")
-    def test_NiTi(self):
-        query = {
-            'composition': 'Ni:1:1 Ti:2:2',
-            'number_of_elements': '2'
-        }
-        ##query = {'icsd_collection_code': 181801}
-        queryer = Queryer(query=query)
-        parsed_entries = queryer.perform_icsd_query()
-        print(parsed_entries)
-        self.assertEqual(7, queryer.hits)
-        queryer.quit()
+    # @unittest.skipIf(not is_mac, "Use macOS to run this")
+    # def test_NiTi(self):
+    #     query = {
+    #         'composition': 'Ni:1:1 Ti:2:2',
+    #         'number_of_elements': '2'
+    #     }
+    #     ##query = {'icsd_collection_code': 181801}
+    #     queryer = Queryer(query=query)
+    #     parsed_entries = queryer.perform_icsd_query()
+    #     print(parsed_entries)
+    #     self.assertEqual(7, queryer.hits)
+    #     queryer.quit()
 
 
 

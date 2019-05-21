@@ -5,7 +5,7 @@ import json
 import time
 
 from selenium import webdriver
-
+from selenium.webdriver.common.keys import Keys
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
 class QueryerError(Exception):
@@ -254,8 +254,18 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        element = self.driver.find_element_by_id('display_form:btnEntryViewDetailed')
+        time.sleep(10)
+        # time.sleep(5)
+        element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows_input')
+        # element = self.driver.find_element_by_xpath("//button[@id='display_form:btnEntryViewDetailed']/span[2]")
+        time.sleep(5)
+        # element = self.driver.find_element_by_css_selector(".ui-state-hover > .ui-chkbox-icon")
+        # element.click()
+        # xpath=
         self.driver.execute_script("arguments[0].click();", element)
+        time.sleep(5)
+        # element.sensd_keys(Keys.SPACE)
+        # ActionChains(self.driver).move_to_element(element).click().perform()
         # self.driver.find_element_by_id('display_form:btnEntryViewDetailed').click()
         self._check_detailed_view()
         self._expand_all()
@@ -273,8 +283,6 @@ class Queryer(object):
             raise QueryerError(error_message)
 
         else:
-            from icecream import ic
-            ic(titles)
             detailed_view = any(['Detailed View' in t.text for t in titles])
             if not detailed_view:
                 self.quit()
@@ -298,7 +306,7 @@ class Queryer(object):
         titles = self.driver.find_elements_by_id('display_main')
         for title in titles:
             if 'Detailed View' in title.text:
-                n_entries_loaded = int(title.text.split()[-1])
+                n_entries_loaded = int(title.text.split()[6])
                 return n_entries_loaded
 
     def parse_entries(self):
@@ -421,8 +429,13 @@ class Queryer(object):
 
         Return: (integer) ICSD Collection Code
         """
+        time.sleep(10)
         titles = self.driver.find_elements_by_id('display_main')
+        from icecream import ic
+
         for title in titles:
+            ic(title.text)
+            ic(title.text.split())
             if 'Summary' in title.text:
                 try:
                     collection_code = int(title.text.split()[-1])
