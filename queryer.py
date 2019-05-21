@@ -3,6 +3,7 @@ import os
 import shutil
 import json
 import time
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -457,18 +458,19 @@ class Queryer(object):
         """
         time.sleep(10)
         titles = self.driver.find_elements_by_id('display_main')
-        from icecream import ic
 
         for title in titles:
-            ic(title.text)
-            ic(title.text.split())
             if 'Summary' in title.text:
                 try:
-                    collection_code = int(title.text.split()[-1])
+                    # collection_code = re.search(
+                    #     'Collection Code ([0-9]+)', title.text
+                    # ).group(0)
+                    # collection_code = int(collection_code)
+                    collection_code = int(title.text.split()[21])
                     break
-                except:
+                except Exception as e:
                     self.quit()
-                    error_message = 'Failed to parse the ICSD Collection Code'
+                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + e
                     raise QueryerError(error_message)
         return collection_code
 
