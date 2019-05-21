@@ -321,13 +321,11 @@ class Queryer(object):
     def _get_number_of_entries_loaded(self):
         """
         Load the number of entries from details.xhtml.
-        Use By.CLASS_NAME to locate 'title' elements, split the element text
+        Use By.CLASS_NAME to locate 'display_main' elements, split the element text
         with 'Detailed View' in it and return the last item in the list.
         """
         titles = self.driver.find_elements_by_id('display_main')
         for title in titles:
-            from icecream import ic
-            ic(title.text)
             if 'Detailed View' in title.text:
                 n_entries_loaded = int(title.text.split()[5])
                 return n_entries_loaded
