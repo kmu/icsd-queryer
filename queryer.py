@@ -250,9 +250,10 @@ class Queryer(object):
         """
         Use By.ID to locate the 'Select All' ('LVSelect') button, and click it.
         """
-        element = self.driver.find_element_by_id(
-            'display_form:listViewTable:uiSelectAllRows')
-        self.driver.execute_script("arguments[0].click();", element)
+        pass
+        # element = self.driver.find_element_by_id(
+        #     'display_form:listViewTable:uiSelectAllRows')
+        # self.driver.execute_script("arguments[0].click();", element)
 
     def wait_for_ajax(self, second=15):
         wait = WebDriverWait(self.driver, second)
