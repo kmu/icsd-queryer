@@ -58,14 +58,10 @@ class Queryer(object):
 
         Attributes:
             url: URL of the search page
-<<<<<<< HEAD
             query: query to be posted to the webform (see kwargs)
-=======
-            query: query to be posted to the webform
             save_screenshot: whether the ICSD page should be saved as a screenshot
             structure_source: search for experimental/theoretical/all structures
             virt_display: Display object from pyvirtualdisplay
->>>>>>> hegdevinayi/master
             browser_data_dir: directory for browser user profile, related data
             driver: instance of Selenium WebDriver running PhantomJS
             hits: number of search hits for the query
@@ -75,10 +71,8 @@ class Queryer(object):
 
         self._query = None
         self.query = query
-<<<<<<< HEAD
         sys.stdout.write('Initializing a WebDriver...\n')
         sys.stdout.flush()
-=======
 
         self._save_screenshot = None
         self.save_screenshot = save_screenshot
@@ -88,7 +82,6 @@ class Queryer(object):
 
         self.virt_diplay = None
 
->>>>>>> hegdevinayi/master
         self.driver = self._initialize_driver()
         self.driver.get(self.url)
 
