@@ -9,8 +9,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
+
 class QueryerError(Exception):
     pass
+
 
 class Queryer(object):
     """
@@ -186,7 +188,8 @@ class Queryer(object):
         tag_dict = {'T': 'Theoretical Structures only',
                     'A': 'All Structures'}
         number_tag = tag_dict.get(self.structure_source)
-        xpath = "//table/tbody/tr/td/label[text()[contains(., '{}')]]".format(tag_dict[self.structure_source])
+        xpath = "//table/tbody/tr/td/label[text()[contains(., '{}')]]".format(
+            tag_dict[self.structure_source])
         radio_label = self.driver.find_element_by_xpath(xpath)
         radio_label.click()
 
@@ -247,14 +250,17 @@ class Queryer(object):
         """
         Use By.ID to locate the 'Select All' ('LVSelect') button, and click it.
         """
-        element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows')
+        element = self.driver.find_element_by_id(
+            'display_form:listViewTable:uiSelectAllRows')
         self.driver.execute_script("arguments[0].click();", element)
 
     def wait_for_ajax(self, second=15):
         wait = WebDriverWait(self.driver, second)
         try:
-            wait.until(lambda driver: self.driver.execute_script('return jQuery.active') == 0)
-            wait.until(lambda driver: self.driver.execute_script('return document.readyState') == 'complete')
+            wait.until(lambda driver: self.driver.execute_script(
+                'return jQuery.active') == 0)
+            wait.until(lambda driver: self.driver.execute_script(
+                'return document.readyState') == 'complete')
         except Exception as e:
             pass
 
@@ -264,22 +270,12 @@ class Queryer(object):
         click it.
         """
 
-
-
-        # time.sleep(10)
         self.wait_for_ajax()
-        # time.sleep(5)
-        element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows_input')
-        # element = self.driver.find_element_by_xpath("//button[@id='display_form:btnEntryViewDetailed']/span[2]")
+        element = self.driver.find_element_by_id(
+            'display_form:listViewTable:uiSelectAllRows_input')
         self.wait_for_ajax()
-        # element = self.driver.find_element_by_css_selector(".ui-state-hover > .ui-chkbox-icon")
-        # element.click()
-        # xpath=
         self.driver.execute_script("arguments[0].click();", element)
         self.wait_for_ajax()
-        # element.sensd_keys(Keys.SPACE)
-        # ActionChains(self.driver).move_to_element(element).click().perform()
-        # self.driver.find_element_by_id('display_form:btnEntryViewDetailed').click()
         self._check_detailed_view()
         self._expand_all()
 
@@ -292,7 +288,8 @@ class Queryer(object):
             titles = self.driver.find_elements_by_id('display_main')
         except Exception as e:
             self.quit()
-            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(e)
+            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(
+                e)
             raise QueryerError(error_message)
 
         else:
@@ -308,7 +305,8 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows')
+        element = self.driver.find_element_by_id(
+            'display_form:listViewTable:uiSelectAllRows')
         self.driver.execute_script("arguments[0].click();", element)
 
     def _get_number_of_entries_loaded(self):
@@ -555,8 +553,8 @@ class Queryer(object):
         """
         element = self.driver.find_element_by_id('textfieldPub1')
         raw_text = element.get_attribute('value').strip()
-        a, b, c, alpha, beta, gamma = [ float(e.split('(')[0].strip('.')) for e
-                                       in raw_text.split() ]
+        a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
+                                       in raw_text.split()]
         cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
                            'gamma': gamma}
         return cell_parameters
@@ -708,7 +706,8 @@ class Queryer(object):
         """
         warnings = []
         block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
-        warning_nodes = block_element.find_elements_by_xpath(".//table/tbody/tr")
+        warning_nodes = block_element.find_elements_by_xpath(
+            ".//table/tbody/tr")
         for node in warning_nodes:
             if node.text:
                 warnings.append(node.text.strip().replace('\n', ' '))
@@ -968,7 +967,8 @@ class Queryer(object):
                            "[base_filename]_[ICSD Collection Code].cif", e.g.,
                            "ICSD_Coll_Code_18975.cif"
         """
-        filename_element = self.driver.find_element_by_id('fileNameForExportToCif')
+        filename_element = self.driver.find_element_by_id(
+            'fileNameForExportToCif')
         filename_element.clear()
         filename_element.send_keys(base_filename)
         self.driver.find_element_by_id('aExportCifFile').click()
@@ -996,7 +996,7 @@ class Queryer(object):
         """
         Post the query to form, parse data for all the entries. (wrapper)
         """
-        ##self.select_structure_source()
+        # self.select_structure_source()
         self.post_query_to_form()
         self._click_select_all()
         self._click_show_detailed_view()
