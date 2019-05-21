@@ -266,13 +266,15 @@ class Queryer(object):
         have 'Detailed View', raise an Error.
         """
         try:
-            titles = self.driver.find_elements_by_class_name('title')
-        except:
+            titles = self.driver.find_elements_by_id('display_main')
+        except Exception as e:
             self.quit()
-            error_message = 'Failed to load "Detailed View" of results'
+            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(e)
             raise QueryerError(error_message)
 
         else:
+            from icecream import ic
+            ic(titles)
             detailed_view = any(['Detailed View' in t.text for t in titles])
             if not detailed_view:
                 self.quit()
@@ -291,7 +293,7 @@ class Queryer(object):
         Use By.CLASS_NAME to locate 'title' elements, split the element text
         with 'Detailed View' in it and return the last item in the list.
         """
-        titles = self.driver.find_elements_by_class_name('title')
+        titles = self.driver.find_elements_by_id('display_main')
         for title in titles:
             if 'Detailed View' in title.text:
                 n_entries_loaded = int(title.text.split()[-1])
@@ -417,7 +419,7 @@ class Queryer(object):
 
         Return: (integer) ICSD Collection Code
         """
-        titles = self.driver.find_elements_by_class_name('title')
+        titles = self.driver.find_elements_by_id('display_main')
         for title in titles:
             if 'Summary' in title.text:
                 try:
