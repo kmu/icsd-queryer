@@ -250,7 +250,11 @@ class Queryer(object):
         """
         Use By.ID to locate the 'Select All' ('LVSelect') button, and click it.
         """
-        pass
+        self.wait_for_ajax()
+        element = self.driver.find_element_by_id(
+            'display_form:listViewTable:uiSelectAllRows_input')
+        self.wait_for_ajax()
+        self.driver.execute_script("arguments[0].click();", element)
         # element = self.driver.find_element_by_id(
         #     'display_form:listViewTable:uiSelectAllRows')
         # self.driver.execute_script("arguments[0].click();", element)
@@ -270,12 +274,18 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-
         self.wait_for_ajax()
-        element = self.driver.find_element_by_id(
-            'display_form:listViewTable:uiSelectAllRows_input')
+        time.sleep(10)
+        # element = self.driver.find_element_by_id(
+        # 'display_form:listViewTable:uiSelectAllRows')
+        element = self.driver.find_element_by_xpath(
+            "//span[contains(.,'Show Detailed View')]")
         self.wait_for_ajax()
+        time.sleep(10)
         self.driver.execute_script("arguments[0].click();", element)
+        time.sleep(10)
+        self.wait_for_ajax()
+
         self.wait_for_ajax()
         self._check_detailed_view()
         self.wait_for_ajax()
@@ -291,8 +301,7 @@ class Queryer(object):
             titles = self.driver.find_elements_by_id('display_main')
         except Exception as e:
             self.quit()
-            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(
-                e)
+            error_message = 'Failed to load "Detailed View" of results.'
             raise QueryerError(error_message)
 
         else:
@@ -308,21 +317,13 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        self.wait_for_ajax()
-        time.sleep(10)
-        # element = self.driver.find_element_by_id(
-            # 'display_form:listViewTable:uiSelectAllRows')
-        element = self.driver.find_element_by_xpath("//span[contains(.,'Show Detailed View')]")
-        self.wait_for_ajax()
-        time.sleep(10)
-        self.driver.execute_script("arguments[0].click();", element)
-        time.sleep(10)
-        self.wait_for_ajax()
+        pass
 
     def _get_number_of_entries_loaded(self):
         """
         Load the number of entries from details.xhtml.
-        Use By.CLASS_NAME to locate 'display_main' elements, split the element text
+        Use By.CLASS_NAME to locate 'display_main' elements,
+        split the element text
         with 'Detailed View' in it and return the last item in the list.
         """
         titles = self.driver.find_elements_by_id('display_main')
