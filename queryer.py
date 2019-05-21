@@ -6,6 +6,7 @@ import time
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
 class QueryerError(Exception):
@@ -249,21 +250,33 @@ class Queryer(object):
         element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows')
         self.driver.execute_script("arguments[0].click();", element)
 
+    def wait_for_ajax(self, second=15):
+        wait = WebDriverWait(self.driver, second)
+        try:
+            wait.until(lambda driver: self.driver.execute_script('return jQuery.active') == 0)
+            wait.until(lambda driver: self.driver.execute_script('return document.readyState') == 'complete')
+        except Exception as e:
+            pass
+
     def _click_show_detailed_view(self):
         """
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        time.sleep(10)
+
+
+
+        # time.sleep(10)
+        self.wait_for_ajax()
         # time.sleep(5)
         element = self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows_input')
         # element = self.driver.find_element_by_xpath("//button[@id='display_form:btnEntryViewDetailed']/span[2]")
-        time.sleep(5)
+        self.wait_for_ajax()
         # element = self.driver.find_element_by_css_selector(".ui-state-hover > .ui-chkbox-icon")
         # element.click()
         # xpath=
         self.driver.execute_script("arguments[0].click();", element)
-        time.sleep(5)
+        self.wait_for_ajax()
         # element.sensd_keys(Keys.SPACE)
         # ActionChains(self.driver).move_to_element(element).click().perform()
         # self.driver.find_element_by_id('display_form:btnEntryViewDetailed').click()
