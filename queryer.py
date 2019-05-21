@@ -318,7 +318,10 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        pass
+        time.sleep(10)
+        self.wait_for_ajax()
+        element = self.driver.find_element_by_link_text("Expand all")
+        self.driver.execute_script("arguments[0].click();", element)
 
     def _get_number_of_entries_loaded(self):
         """
