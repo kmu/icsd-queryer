@@ -219,13 +219,13 @@ class Queryer(object):
 
     def _check_list_view(self):
         """
-        Use By.CLASS_NAME to locate the first 'title' element, raise Error if
+        Use id to locate the first 'display_main' element, raise Error if
         'List View' is not in the element text.
         Parse element text to get number of hits for the current query
         (last item when text is split), assign to `self.hits`.
         """
         try:
-            title = self.driver.find_element_by_class_name('title')
+            title = self.driver.find_element_by_id('display_main')
         except:
             self.quit()
             error_message= 'No hits/too many hits. Modify your query.'
