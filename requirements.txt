@@ -3,3 +3,4 @@ coverage
 PyYAML
 selenium
 PyVirtualDisplay
+beautifulsoap4
