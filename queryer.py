@@ -94,6 +94,8 @@ class Queryer(object):
 
         self.hits = 0
 
+        self.page_obatained = False
+
     @property
     def url(self):
         return self._url
@@ -469,7 +471,20 @@ class Queryer(object):
                     raise QueryerError(error_message)
         return collection_code
 
+    def get_html_table(self, idx):
+
+        if not self.page_obatained:
+            self.wait_for_ajax()
+            self.soup = BeautifulSoup(self.driver.page_source, 'lxml')
+            self.page_obatained = True
+
+        # ic(self.soup)
+        table = self.soup.find_all('table')[idx]
+
+        return(str(table))
+
     # panel: "Summary"
+
     def get_PDF_number(self):
         """
         Use By.XPATH to locate a 'td' node with the tag name (stored in
@@ -479,14 +494,11 @@ class Queryer(object):
         """
         pdf_number = ''
 
-        soup_level2 = BeautifulSoup(self.driver.page_source, 'lxml')
-        table = soup_level2.find_all('table')[17]
+        table = self.get_html_table(idx=17)
 
-        df = pd.read_html(str(table), index_col=0)
-        print(df)
+        df = pd.read_html(table, index_col=0)
 
         pdf_number = df.loc['PDF calc.', 1]
-
 
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
