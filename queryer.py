@@ -570,7 +570,6 @@ class Queryer(object):
         # element = self.driver.find_element_by_id('textfieldChem1')
         table = self.get_html_table(idx=2)
         df = pd.read_html(table, index_col=0)
-        print(df)
         formula = df.loc['Sum. formula', 1]
         return formula.strip()
 
@@ -583,7 +582,6 @@ class Queryer(object):
         """
         table = self.get_html_table(idx=2)
         df = pd.read_html(table, index_col=3)
-        print(df)
         formula = df.loc['Struct. formula', 4]
         return formula.strip()
 
@@ -596,7 +594,6 @@ class Queryer(object):
         """
         table = self.get_html_table(idx=2)
         df = pd.read_html(table, index_col=3)
-        print(df)
         formula = df.loc['AB formula', 4]
         return formula.strip()
 
@@ -614,7 +611,6 @@ class Queryer(object):
         # element = self.driver.find_element_by_id('textfieldPub1')
         table = self.get_html_table(idx=3)
         df = pd.read_html(table, index_col=0)
-        print(df)
         raw_text = df.loc['Cell parameter', 1]
         raw_text = raw_text.strip()
         a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
@@ -641,7 +637,6 @@ class Queryer(object):
         """
         table = self.get_html_table(idx=3)
         df = pd.read_html(table, index_col=0)
-        print(df)
         volume = df.loc['Cell volume', 1]
         return volume.strip()
 
@@ -652,8 +647,10 @@ class Queryer(object):
 
         Return: (string) Space group if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldPub5')
-        return element.get_attribute('value').strip()
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=3)
+        volume = df.loc['Space group', 4]
+        return volume.strip()
 
     def get_crystal_system(self):
         """
