@@ -282,7 +282,7 @@ class Queryer(object):
         element = self.driver.find_element_by_xpath(
             "//span[contains(.,'Show Detailed View')]")
         self.wait_for_ajax()
-        time.sleep(10)
+        time.sleep(3)
         self.driver.execute_script("arguments[0].click();", element)
         # time.sleep(10)
 
@@ -318,7 +318,7 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        time.sleep(10)
+        # time.sleep(10)
         self.wait_for_ajax()
         element = self.driver.find_element_by_link_text("Expand all")
         self.driver.execute_script("arguments[0].click();", element)
