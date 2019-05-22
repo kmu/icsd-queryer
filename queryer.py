@@ -3,8 +3,8 @@ import os
 import shutil
 import json
 import time
-import re
 from bs4 import BeautifulSoup
+import pandas as pd
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -461,10 +461,6 @@ class Queryer(object):
         for title in titles:
             if 'Summary' in title.text:
                 try:
-                    # collection_code = re.search(
-                    #     'Collection Code ([0-9]+)', title.text
-                    # ).group(0)
-                    # collection_code = int(collection_code)
                     collection_code = int(title.text.split()[21])
                     break
                 except Exception as e:
@@ -481,8 +477,6 @@ class Queryer(object):
 
         Return: (string) PDF-number if available, empty string otherwise
         """
-        import pandas as pd
-
         soup_level2 = BeautifulSoup(self.driver.page_source, 'lxml')
         table = soup_level2.find_all('table')[17]
 
