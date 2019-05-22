@@ -536,10 +536,7 @@ class Queryer(object):
         Return: (string) Publication title if available, empty string otherwise
         """
         table = self.get_html_table(idx=0)
-
         df = pd.read_html(table, index_col=3)
-        print(df)
-
         title = df.loc['Title', 4]
         return title.strip().replace('\n', ' ')
 
@@ -554,8 +551,13 @@ class Queryer(object):
         Return: (string) Bibliographic reference if available, empty string
         otherwise
         """
-        element = self.driver.find_element_by_id('textfield12')
-        return element.text.strip().replace('\n', ' ')
+
+        # element = self.driver.find_element_by_id('textfield12')
+        table = self.get_html_table(idx=0)
+        df = pd.read_html(table, index_col=0)
+        reference = df.loc['Reference', 4]
+
+        return reference.strip().replace('\n', ' ')
 
     # panel: "Chemistry"
     def get_chemical_formula(self):
@@ -565,8 +567,12 @@ class Queryer(object):
 
         Return: (string) Chemical formula if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldChem1')
-        return element.get_attribute('value').strip()
+        # element = self.driver.find_element_by_id('textfieldChem1')
+        table = self.get_html_table(idx=2)
+        df = pd.read_html(table, index_col=0)
+        print(df)
+        formula = df.loc['Sum. formula', 1]
+        return formula.strip()
 
     def get_structural_formula(self):
         """
@@ -575,8 +581,11 @@ class Queryer(object):
 
         Return: (string) Structural formula if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldChem3')
-        return element.text.strip()
+        table = self.get_html_table(idx=2)
+        df = pd.read_html(table, index_col=3)
+        print(df)
+        formula = df.loc['Struct. formula', 4]
+        return formula.strip()
 
     def get_AB_formula(self):
         """
@@ -585,8 +594,11 @@ class Queryer(object):
 
         Return: (string) AB formula if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldChem6')
-        return element.get_attribute('value').strip()
+        table = self.get_html_table(idx=2)
+        df = pd.read_html(table, index_col=3)
+        print(df)
+        formula = df.loc['AB formula', 4]
+        return formula.strip()
 
     # panel: "Published Crystal Structure Data"
     def get_cell_parameters(self):
@@ -599,12 +611,25 @@ class Queryer(object):
                 'beta', 'gamma', and values in float
                 (Lattice vectors are in Angstrom, angles in degrees.)
         """
-        element = self.driver.find_element_by_id('textfieldPub1')
-        raw_text = element.get_attribute('value').strip()
+        # element = self.driver.find_element_by_id('textfieldPub1')
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=0)
+        print(df)
+        raw_text = df.loc['Cell parameter', 1]
+        raw_text = raw_text.strip()
         a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
                                        in raw_text.split()]
         cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
                            'gamma': gamma}
+        assert a > 0
+        assert b > 0
+        assert c > 0
+        assert alpha > 0
+        assert beta > 0
+        assert gamma > 0
+        assert alpha < 180
+        assert beta < 180
+        assert gamma < 180
         return cell_parameters
 
     def get_volume(self):
@@ -614,8 +639,11 @@ class Queryer(object):
 
         Return: (float) Volume in cubic Angstrom
         """
-        element = self.driver.find_element_by_id('textfieldPub2')
-        return float(element.get_attribute('value').strip())
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=0)
+        print(df)
+        volume = df.loc['Cell volume', 1]
+        return volume.strip()
 
     def get_space_group(self):
         """
