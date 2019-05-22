@@ -445,8 +445,9 @@ class Queryer(object):
             method = 'is_{}'.format(tag)
             try:
                 parsed_data[tag] = getattr(self, method)()
-            except AttributeError:
+            except AttributeError as e:
                 sys.stdout.write('"{}" parser not implemented!\n'.format(tag))
+                print(e)
                 continue
         return parsed_data
 
@@ -534,8 +535,16 @@ class Queryer(object):
 
         Return: (string) Publication title if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfield13')
-        return element.text.strip().replace('\n', ' ')
+        table = self.get_html_table(idx=0)
+
+        df = pd.read_html(table, index_col=3)
+        print(df)
+
+        title = df.loc['Title', 4]
+        return title.strip().replace('\n', ' ')
+
+        # element = self.driver.find_element_by_id('textfield13')
+        # return element.text.strip().replace('\n', ' ')
 
     def get_reference(self):
         """
