@@ -98,7 +98,7 @@ class Queryer(object):
 
     @property
     def url(self):
-        return self._url
+        return(self._url)
 
     @url.setter
     def url(self, url):
@@ -108,7 +108,7 @@ class Queryer(object):
 
     @property
     def query(self):
-        return self._query
+        return(self._query)
 
     @query.setter
     def query(self, query):
@@ -119,7 +119,7 @@ class Queryer(object):
 
     @property
     def save_screenshot(self):
-        return self._save_screenshot
+        return(self._save_screenshot)
 
     @save_screenshot.setter
     def save_screenshot(self, save_screenshot):
@@ -132,7 +132,7 @@ class Queryer(object):
 
     @property
     def structure_source(self):
-        return self._structure_source
+        return(self._structure_source)
 
     @structure_source.setter
     def structure_source(self, structure_source):
@@ -161,7 +161,7 @@ class Queryer(object):
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
         prefs = {'download.default_directory': self.download_dir}
         _options.add_experimental_option("prefs", prefs)
-        return webdriver.Chrome(chrome_options=_options)
+        return(webdriver.Chrome(chrome_options=_options))
 
     def _check_basic_search(self):
         """
@@ -329,13 +329,13 @@ class Queryer(object):
         """
         Load the number of entries from details.xhtml.
         Use By.CLASS_NAME to locate 'display_main' elements, split the element text
-        with 'Detailed View' in it and return the last item in the list.
+        with 'Detailed View' in it and return(the last item in )the list.
         """
         titles = self.driver.find_elements_by_id('display_main')
         for title in titles:
             if 'Detailed View' in title.text:
                 n_entries_loaded = int(title.text.split()[5])
-                return n_entries_loaded
+                return(n_entries_loaded)
 
     def parse_entries(self):
         """
@@ -408,7 +408,7 @@ class Queryer(object):
         sys.stdout.flush()
         self.quit()
         sys.stdout.write(' done.\n')
-        return entries_parsed
+        return(entries_parsed)
 
     def _go_to_next_entry(self):
         """
@@ -449,7 +449,7 @@ class Queryer(object):
                 sys.stdout.write('"{}" parser not implemented!\n'.format(tag))
                 print(e)
                 continue
-        return parsed_data
+        return(parsed_data)
 
     def get_collection_code(self):
         """
@@ -470,7 +470,7 @@ class Queryer(object):
                     self.quit()
                     error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + e
                     raise QueryerError(error_message)
-        return collection_code
+        return(collection_code)
 
     def get_html_table(self, idx):
 
@@ -504,7 +504,7 @@ class Queryer(object):
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         # nodes = self.driver.find_elements_by_xpath(xpath)
-        # # if PDF_number field is empty, return "" instead of "R-value"
+        # # if PDF_number field is empty, return("" instead of )"R-value"
 
         # from icecream import ic
         # for node in nodes:
@@ -512,7 +512,7 @@ class Queryer(object):
 
         # if nodes[0].text != 'R-value':
         #     pdf_number = nodes[0].text.split('\n')[0]
-        return pdf_number
+        return(pdf_number)
 
     def get_authors(self):
         """
@@ -526,7 +526,7 @@ class Queryer(object):
         xpath = "//td[text()[contains(., '{}')]]/../td".format(tag)
         nodes = self.driver.find_elements_by_xpath(xpath)
         authors = nodes[1].text.strip().replace('\n', ' ')
-        return authors
+        return(authors)
 
     def get_publication_title(self):
         """
@@ -538,10 +538,10 @@ class Queryer(object):
         table = self.get_html_table(idx=0)
         df = pd.read_html(table, index_col=3)
         title = df.loc['Title', 4]
-        return title.strip().replace('\n', ' ')
+        return(title.strip().replace('\n', ' '))
 
         # element = self.driver.find_element_by_id('textfield13')
-        # return element.text.strip().replace('\n', ' ')
+        # return(element.text.strip().replace('\n', ' '))
 
     def get_reference(self):
         """
@@ -557,7 +557,7 @@ class Queryer(object):
         df = pd.read_html(table, index_col=0)
         reference = df.loc['Reference', 4]
 
-        return reference.strip().replace('\n', ' ')
+        return(reference.strip().replace('\n', ' '))
 
     # panel: "Chemistry"
     def get_chemical_formula(self):
@@ -571,7 +571,7 @@ class Queryer(object):
         table = self.get_html_table(idx=2)
         df = pd.read_html(table, index_col=0)
         formula = df.loc['Sum. formula', 1]
-        return formula.strip()
+        return(formula.strip())
 
     def get_structural_formula(self):
         """
@@ -583,7 +583,7 @@ class Queryer(object):
         table = self.get_html_table(idx=2)
         df = pd.read_html(table, index_col=3)
         formula = df.loc['Struct. formula', 4]
-        return formula.strip()
+        return(formula.strip())
 
     def get_AB_formula(self):
         """
@@ -595,7 +595,7 @@ class Queryer(object):
         table = self.get_html_table(idx=2)
         df = pd.read_html(table, index_col=3)
         formula = df.loc['AB formula', 4]
-        return formula.strip()
+        return(formula.strip())
 
     # panel: "Published Crystal Structure Data"
     def get_cell_parameters(self):
@@ -626,7 +626,7 @@ class Queryer(object):
         assert alpha < 180
         assert beta < 180
         assert gamma < 180
-        return cell_parameters
+        return(cell_parameters)
 
     def get_volume(self):
         """
@@ -638,7 +638,7 @@ class Queryer(object):
         table = self.get_html_table(idx=3)
         df = pd.read_html(table, index_col=0)
         volume = df.loc['Cell volume', 1]
-        return volume.strip()
+        return(volume.strip())
 
     def get_space_group(self):
         """
@@ -647,10 +647,15 @@ class Queryer(object):
 
         Return: (string) Space group if available, empty string otherwise
         """
+
+        # Published Crystal Structure Data
         table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=3)
-        volume = df.loc['Space group', 4]
-        return volume.strip()
+        df = pd.read_html(table)
+        # df = pd.read_html(table, index_col=3)
+        # print(df)
+        # volume = df.loc['Space group', 4]
+        space_group = df.iloc[0, 4]
+        return(space_group.strip())
 
     def get_crystal_system(self):
         """
@@ -659,8 +664,11 @@ class Queryer(object):
 
         Return: (string) Crystal system if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldPub8')
-        return element.get_attribute('value').strip()
+        # Published Crystal Structure Data
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=0)
+        system = df.loc['Crystal system', 1]
+        return(system.strip())
 
     def get_wyckoff_sequence(self):
         """
@@ -669,8 +677,15 @@ class Queryer(object):
 
         Return: (string) Wyckoff sequence if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldPub11')
-        return element.get_attribute('value').strip()
+        # element = self.driver.find_element_by_id('textfieldPub11')
+
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=0)
+        wyckoff = df.loc['Wyckoff sequence', 1]
+        return(wyckoff.strip())
+
+
+        return(element.get_attribute('value').strip())
 
     def get_formula_units_per_cell(self):
         """
@@ -679,38 +694,54 @@ class Queryer(object):
 
         Return: (integer) Formula units per unit cell
         """
+        print("'Formula Units per Cell' seems to be removed")
+        return("")
         element = self.driver.find_element_by_id('textfieldPub3')
-        return int(element.get_attribute('value').strip())
+        return(int(element.get_attribute('value').strip()))
 
     def get_pearson(self):
         """
+        details.xhtml > Details
+        > Published Crystal Structure Data > Pearson symbol
+
         Use By.ID to locate 'Pearson Symbol' ['textfieldPub6'], parse its
         'value' attribute.
 
         Return: (string) Pearson symbol if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldPub6')
-        return element.get_attribute('value').strip()
+
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=0)
+        df.to_csv('tmp.csv')
+        pearson = df.loc['Pearson symbol', 1]
+        return(pearson.strip())
 
     def get_crystal_class(self):
         """
+        details.xhtml > Details
+        > Published Crystal Structure Data > Crystal class
+
         Use By.ID to locate 'Crystal Class' ['textfieldPub9'], parse its 'value'
         attribute.
 
         Return: (string) Crystal class if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldPub9')
-        return element.get_attribute('value').strip()
+        table = self.get_html_table(idx=3)
+        df = pd.read_html(table, index_col=0)
+        crystal_class = df.iloc[2, 4]
+        # element = self.driver.find_element_by_id('textfieldPub9')
+        return(crystal_class.strip())
 
     def get_structural_prototype(self):
         """
+        Probably abolished?
+
         Use By.ID to locate 'Structure Type' ['textfieldPub12'], parse its
         'value' attribute.
 
         Return: (string) Structure type if available, empty string otherwise
         """
-        element = self.driver.find_element_by_id('textfieldPub12')
-        return element.get_attribute('value').strip()
+        return("")
 
     # panel: "Bibliography"
     def _get_references(self, n):
@@ -728,7 +759,7 @@ class Queryer(object):
         xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         nodes = self.driver.find_elements_by_xpath(xpath)
         reference = self._clean_reference_string(nodes[n].text)
-        return reference
+        return(reference)
 
     def get_reference_1(self):
         """
@@ -736,7 +767,7 @@ class Queryer(object):
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return self._get_references(0)
+        return(self._get_references(0))
 
     def get_reference_2(self):
         """
@@ -744,7 +775,7 @@ class Queryer(object):
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return self._get_references(1)
+        return(self._get_references(1))
 
     def get_reference_3(self):
         """
@@ -752,7 +783,7 @@ class Queryer(object):
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return self._get_references(2)
+        return(self._get_references(2))
 
     def _clean_reference_string(self, r):
         """
@@ -766,7 +797,7 @@ class Queryer(object):
         r = r.strip()
         r = r.replace('Northwestern University Library', '').strip()
         r = r.replace('\n', ' ')
-        return r
+        return(r)
 
     # panel: "Warnings & Comments"
     def get_warnings(self):
@@ -784,7 +815,7 @@ class Queryer(object):
         for node in warning_nodes:
             if node.text:
                 warnings.append(node.text.strip().replace('\n', ' '))
-        return warnings
+        return(warnings)
 
     def get_comments(self):
         """
@@ -802,12 +833,16 @@ class Queryer(object):
         for node in comment_nodes:
             if node.text:
                 comments.append(node.text.strip().replace('\n', ' '))
-        return comments
+        return(comments)
 
     # panel: "Experimental Conditions"
     # text fields
     def get_temperature(self):
         """
+        details.xhtml > Details
+        > Experimental information > Temperature
+
+
         Use By.XPATH to locate the 'input' nodes associated with the div name
         (stored in `tag.ICSD_PARSE_TAGS`), and get the 'value' attribute of the
         first node.
@@ -815,11 +850,16 @@ class Queryer(object):
         Return: (string) Temperature if available, empty string otherwise
         """
         temperature = ''
-        tag = ICSD_PARSE_TAGS['temperature']
-        xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
-        nodes = self.driver.find_elements_by_xpath(xpath)
-        temperature = nodes[0].get_attribute('value').strip()
-        return temperature
+
+        table = self.get_html_table(idx=17)
+        df = pd.read_html(table, index_col=0)
+        formula = df.loc['Temperature', 1]
+        return(formula.strip())
+        # tag = ICSD_PARSE_TAGS['temperature']
+        # xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
+        # nodes = self.driver.find_elements_by_xpath(xpath)
+        # temperature = nodes[0].get_attribute('value').strip()
+        return(temperature)
 
     def get_pressure(self):
         """
@@ -834,7 +874,7 @@ class Queryer(object):
         xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
         nodes = self.driver.find_elements_by_xpath(xpath)
         pressure = nodes[1].get_attribute('value').strip()
-        return pressure
+        return(pressure)
 
     def get_R_value(self):
         """
@@ -852,7 +892,7 @@ class Queryer(object):
         R_value = node.get_attribute('value').strip()
         if R_value:
             R_value = float(R_value.split('(')[0])
-        return R_value
+        return(R_value)
 
     # checkboxes
     def _is_checkbox_enabled(self, tag_key):
@@ -868,163 +908,163 @@ class Queryer(object):
         xpath += "/../input[@type='checkbox']"
         node = self.driver.find_element_by_xpath(xpath)
         if node.get_attribute('checked') is None:
-            return False
+            return(False)
         else:
-            return True
+            return(True)
 
     # subpanel: "Radiation Type"
     def is_x_ray(self):
         """
         Is the 'X-ray' checkbox enabled?
         """
-        return self._is_checkbox_enabled('x_ray')
+        return(self._is_checkbox_enabled('x_ray'))
 
     def is_electron_diffraction(self):
         """
         Is the 'Electrons' checkbox enabled?
         """
-        return self._is_checkbox_enabled('electron_diffraction')
+        return(self._is_checkbox_enabled('electron_diffraction'))
 
     def is_neutron_diffraction(self):
         """
         Is the 'Neutrons' checkbox enabled?
         """
-        return self._is_checkbox_enabled('neutron_diffraction')
+        return(self._is_checkbox_enabled('neutron_diffraction'))
 
     def is_synchrotron(self):
         """
         Is the 'Synchrotron' checkbox enabled?
         """
-        return self._is_checkbox_enabled('synchrotron')
+        return(self._is_checkbox_enabled('synchrotron'))
 
     # subpanel: "Sample Type"
     def is_powder(self):
         """
         Is the 'Powder' checkbox enabled?
         """
-        return self._is_checkbox_enabled('powder')
+        return(self._is_checkbox_enabled('powder'))
 
     def is_single_crystal(self):
         """
         Is the 'Single-Cystal' checkbox enabled?
         """
-        return self._is_checkbox_enabled('single_crystal')
+        return(self._is_checkbox_enabled('single_crystal'))
 
     # subpanel: "Additional Information"
     def is_twinned_crystal_data(self):
         """
         Is the 'Twinned Crystal Data' checkbox enabled?
         """
-        return self._is_checkbox_enabled('twinned_crystal_data')
+        return(self._is_checkbox_enabled('twinned_crystal_data'))
 
     def is_rietveld_employed(self):
         """
         Is the 'Rietveld Refinement employed' checkbox enabled?
         """
-        return self._is_checkbox_enabled('rietveld_employed')
+        return(self._is_checkbox_enabled('rietveld_employed'))
 
     def is_absolute_config_determined(self):
         """
         Is the 'Absolute Configuration Determined' checkbox enabled?
         """
-        return self._is_checkbox_enabled('absolute_config_determined')
+        return(self._is_checkbox_enabled('absolute_config_determined'))
 
     def is_experimental_PDF_number(self):
         """
         Is the 'Experimental PDF Number assigned' checkbox enabled?
         """
-        return self._is_checkbox_enabled('experimental_PDF_number')
+        return(self._is_checkbox_enabled('experimental_PDF_number)'))
 
     def is_temperature_factors_available(self):
         """
         Is the 'Temperature Factors available' checkbox enabled?
         """
-        return self._is_checkbox_enabled('temperature_factors_available')
+        return(self._is_checkbox_enabled('temperature_factors_available'))
 
     def is_magnetic_structure_available(self):
         """
         Is the 'Magnetic Structure Available' checkbox enabled?
         """
-        return self._is_checkbox_enabled('magnetic_structure_available')
+        return(self._is_checkbox_enabled('magnetic_structure_available'))
 
     def is_anharmonic_temperature_factors_given(self):
         """
         Is the 'Anharmonic temperature factors given' checkbox enabled?
         """
-        return self._is_checkbox_enabled('anharmonic_temperature_factors_given')
+        return(self._is_checkbox_enabled('anharmonic_temperature_factors_given'))
 
     def is_calculated_PDF_number(self):
         """
         Is the 'Calculated PDF Number assigned' checkbox enabled?
         """
-        return self._is_checkbox_enabled('calculated_PDF_number')
+        return(self._is_checkbox_enabled('calculated_PDF_number'))
 
     def is_NMR_data_available(self):
         """
         Is the 'NMR Data available' checkbox enabled?
         """
-        return self._is_checkbox_enabled('NMR_data_available')
+        return(self._is_checkbox_enabled('NMR_data_available'))
 
     def is_correction_of_previous(self):
         """
         Is the 'Correction of Earlier Work' checkbox enabled?
         """
-        return self._is_checkbox_enabled('correction_of_previous')
+        return(self._is_checkbox_enabled('correction_of_previous'))
 
     def is_cell_constants_without_sd(self):
         """
         Is the 'Cell Constants without s.d.' checkbox enabled?
         """
-        return self._is_checkbox_enabled('cell_constants_without_sd')
+        return(self._is_checkbox_enabled('cell_constants_without_sd'))
 
     def is_only_cell_and_structure_type(self):
         """
         Is the 'Only Cell and Structure Type Determined' checkbox enabled?
         """
-        return self._is_checkbox_enabled('only_cell_and_structure_type')
+        return(self._is_checkbox_enabled('only_cell_and_structure_type'))
 
     # subpanel: "Properties of Structure"
     def is_polytype(self):
         """
         Is the 'Polytype Structure' checkbox enabled?
         """
-        return self._is_checkbox_enabled('polytype')
+        return(self._is_checkbox_enabled('polytype'))
 
     def is_is_prototype_structure(self):
         """
         Is the 'Prototype Structure Type' checkbox enabled?
         """
-        return self._is_checkbox_enabled('is_prototype_structure')
+        return(self._is_checkbox_enabled('is_prototype_structure'))
 
     def is_order_disorder(self):
         """
         Is the 'Order/Disorder Structure' checkbox enabled?
         """
-        return self._is_checkbox_enabled('order_disorder')
+        return(self._is_checkbox_enabled('order_disorder'))
 
     def is_modulated_structure(self):
         """
         Is the 'Modulated Structure' checkbox enabled?
         """
-        return self._is_checkbox_enabled('modulated_structure')
+        return(self._is_checkbox_enabled('modulated_structure'))
 
     def is_disordered(self):
         """
         Is the 'Disordered Structure' checkbox enabled?
         """
-        return self._is_checkbox_enabled('disordered')
+        return(self._is_checkbox_enabled('disordered'))
 
     def is_mineral(self):
         """
         Is the 'Mineral' checkbox enabled?
         """
-        return self._is_checkbox_enabled('mineral')
+        return(self._is_checkbox_enabled('mineral'))
 
     def is_is_structure_prototype(self):
         """
         Is the 'Structure Prototype' checkbox enabled?
         """
-        return self._is_checkbox_enabled('is_structure_prototype')
+        return(self._is_checkbox_enabled('is_structure_prototype'))
 
     def export_CIF(self, base_filename='ICSD_Coll_Code'):
         """
@@ -1073,4 +1113,4 @@ class Queryer(object):
         self.post_query_to_form()
         self._click_select_all()
         self._click_show_detailed_view()
-        return self.parse_entries()
+        return(self.parse_entries())
