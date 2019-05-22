@@ -318,7 +318,7 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        # time.sleep(10)
+        time.sleep(3)
         self.wait_for_ajax()
         element = self.driver.find_element_by_link_text("Expand all")
         self.driver.execute_script("arguments[0].click();", element)
@@ -477,25 +477,28 @@ class Queryer(object):
 
         Return: (string) PDF-number if available, empty string otherwise
         """
+        pdf_number = ''
+
         soup_level2 = BeautifulSoup(self.driver.page_source, 'lxml')
         table = soup_level2.find_all('table')[17]
 
-        df = pd.read_html(str(table), header=None)
+        df = pd.read_html(str(table), index_col=0)
         print(df)
 
+        pdf_number = df.loc['PDF calc.', 1]
 
-        pdf_number = ''
-        tag = ICSD_PARSE_TAGS['PDF_number']
-        xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
-        nodes = self.driver.find_elements_by_xpath(xpath)
-        # if PDF_number field is empty, return "" instead of "R-value"
 
-        from icecream import ic
-        for node in nodes:
-            ic(node.text)
+        # tag = ICSD_PARSE_TAGS['PDF_number']
+        # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
+        # nodes = self.driver.find_elements_by_xpath(xpath)
+        # # if PDF_number field is empty, return "" instead of "R-value"
 
-        if nodes[0].text != 'R-value':
-            pdf_number = nodes[0].text.split('\n')[0]
+        # from icecream import ic
+        # for node in nodes:
+        #     ic(node.text)
+
+        # if nodes[0].text != 'R-value':
+        #     pdf_number = nodes[0].text.split('\n')[0]
         return pdf_number
 
     def get_authors(self):
