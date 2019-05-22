@@ -4,6 +4,7 @@ import shutil
 import json
 import time
 import re
+from bs4 import BeautifulSoup
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -276,7 +277,6 @@ class Queryer(object):
         click it.
         """
         self.wait_for_ajax()
-        time.sleep(10)
         # element = self.driver.find_element_by_id(
         # 'display_form:listViewTable:uiSelectAllRows')
         element = self.driver.find_element_by_xpath(
@@ -284,8 +284,7 @@ class Queryer(object):
         self.wait_for_ajax()
         time.sleep(10)
         self.driver.execute_script("arguments[0].click();", element)
-        time.sleep(10)
-        self.wait_for_ajax()
+        # time.sleep(10)
 
         self.wait_for_ajax()
         self._check_detailed_view()
@@ -482,11 +481,25 @@ class Queryer(object):
 
         Return: (string) PDF-number if available, empty string otherwise
         """
+        import pandas as pd
+
+        soup_level2 = BeautifulSoup(self.driver.page_source, 'lxml')
+        table = soup_level2.find_all('table')[17]
+
+        df = pd.read_html(str(table), header=None)
+        print(df)
+
+
         pdf_number = ''
         tag = ICSD_PARSE_TAGS['PDF_number']
         xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         nodes = self.driver.find_elements_by_xpath(xpath)
         # if PDF_number field is empty, return "" instead of "R-value"
+
+        from icecream import ic
+        for node in nodes:
+            ic(node.text)
+
         if nodes[0].text != 'R-value':
             pdf_number = nodes[0].text.split('\n')[0]
         return pdf_number
