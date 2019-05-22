@@ -4,3 +4,4 @@ PyYAML
 selenium
 PyVirtualDisplay
 beautifulsoup4
+pandas
