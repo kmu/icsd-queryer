@@ -808,13 +808,17 @@ class Queryer(object):
 
         Return: (list) A list of warnings if any, empty list otherwise
         """
-        warnings = []
-        block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
-        warning_nodes = block_element.find_elements_by_xpath(
-            ".//table/tbody/tr")
-        for node in warning_nodes:
-            if node.text:
-                warnings.append(node.text.strip().replace('\n', ' '))
+
+        print("Warnings are not captured.")
+        return([])
+
+        # warnings = []
+        # block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
+        # warning_nodes = block_element.find_elements_by_xpath(
+        #     ".//table/tbody/tr")
+        # for node in warning_nodes:
+        #     if node.text:
+        #         warnings.append(node.text.strip().replace('\n', ' '))
         return(warnings)
 
     def get_comments(self):
@@ -825,6 +829,8 @@ class Queryer(object):
 
         Return: (list) A list of comments if any, empty list otherwise
         """
+        print("Comments are not captured.")
+        return([])
         comments = []
         block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
         tag = ICSD_PARSE_TAGS['comments']
@@ -842,7 +848,6 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Temperature
 
-
         Use By.XPATH to locate the 'input' nodes associated with the div name
         (stored in `tag.ICSD_PARSE_TAGS`), and get the 'value' attribute of the
         first node.
@@ -853,8 +858,8 @@ class Queryer(object):
 
         table = self.get_html_table(idx=17)
         df = pd.read_html(table, index_col=0)
-        formula = df.loc['Temperature', 1]
-        return(formula.strip())
+        temperature = df.loc['Temperature', 1]
+        return(temperature.strip())
         # tag = ICSD_PARSE_TAGS['temperature']
         # xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
         # nodes = self.driver.find_elements_by_xpath(xpath)
@@ -863,36 +868,35 @@ class Queryer(object):
 
     def get_pressure(self):
         """
+        details.xhtml > Details
+        > Experimental information > Pressure
+
         Use By.XPATH to locate the 'input' nodes associated with the div name
         (stored in `tag.ICSD_PARSE_TAGS`), and get the 'value' attribute of the
         second node.
 
         Return: (string) Pressure if available, empty string otherwise
         """
-        pressure = ''
-        tag = ICSD_PARSE_TAGS['pressure']
-        xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
-        nodes = self.driver.find_elements_by_xpath(xpath)
-        pressure = nodes[1].get_attribute('value').strip()
-        return(pressure)
+        table = self.get_html_table(idx=17)
+        df = pd.read_html(table, index_col=3)
+        pressure = df.loc['Pressure', 4]
+        return(pressure.strip())
 
     def get_R_value(self):
         """
+        details.xhtml > Details
+        > Experimental information > R-value
+
         Use By.XPATH to locate the 'input' node with attribute 'text',
         associated with 'td' node with the tag name (stored in
         `tags.ICSD_PARSE_TAGS`), get its 'value' attribute.
 
         Return: (float) R-value if available, None otherwise
         """
-        R_value = None
-        tag = ICSD_PARSE_TAGS['R_value']
-        xpath = "//td[text()[contains(., '{}')]]".format(tag)
-        xpath += "/../td/input[@type='text']"
-        node = self.driver.find_element_by_xpath(xpath)
-        R_value = node.get_attribute('value').strip()
-        if R_value:
-            R_value = float(R_value.split('(')[0])
-        return(R_value)
+        table = self.get_html_table(idx=17)
+        df = pd.read_html(table, index_col=0)
+        pressure = df.loc['R-value', 1]
+        return(pressure.strip())
 
     # checkboxes
     def _is_checkbox_enabled(self, tag_key):
@@ -912,62 +916,137 @@ class Queryer(object):
         else:
             return(True)
 
+    def _get_radiation_type(self):
+        """
+        details.xhtml > Details
+        > Experimental information > Radiation type
+        """
+        table = self.get_html_table(idx=17)
+        df = pd.read_html(table, index_col=0)[0]
+        rad_type = df.loc['Radiation type', 1]
+        return(rad_type.strip())
+
     # subpanel: "Radiation Type"
     def is_x_ray(self):
         """
         Is the 'X-ray' checkbox enabled?
+
+        details.xhtml > Details
+        > Experimental information > Radiation Type
         """
-        return(self._is_checkbox_enabled('x_ray'))
+        return('X-ray' == self._get_radiation_type())
+
+        # return(self._is_checkbox_enabled('x_ray'))
 
     def is_electron_diffraction(self):
         """
         Is the 'Electrons' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('electron_diffraction'))
+        return('Electrons' == self._get_radiation_type())
+        # return(self._is_checkbox_enabled('electron_diffraction'))
 
     def is_neutron_diffraction(self):
         """
         Is the 'Neutrons' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('neutron_diffraction'))
+        return('Neutrons' == self._get_radiation_type())
+        # return(self._is_checkbox_enabled('neutron_diffraction'))
 
     def is_synchrotron(self):
         """
         Is the 'Synchrotron' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('synchrotron'))
+        return('Synchrotron' == self._get_radiation_type())
+        # return(self._is_checkbox_enabled('synchrotron'))
+
+    def _get_experimental_information_table(self):
+        table = self.get_html_table(idx=17)
+        df = pd.read_html(table)[0]
+
+        df1 = df.loc[:, 0:1]
+        df2 = df.loc[:, 3:5]
+
+        df1.columns = ['Name', "Value"]
+        df2.columns = ['Name', "Value"]
+
+        print("df1")
+        print(df1)
+        print("df2")
+        print(df2)
+
+        df = pd.concat([df1, df2], axis=0)
+        print(df)
+        return(df)
+
+    def _get_sample_type(self):
+        """
+        details.xhtml > Details
+        > Experimental information > Sample type
+        """
+        # table = self.get_html_table(idx=17)
+        # df = pd.read_html(table, index_col=3)[0]
+        # print(df)
+        # sample_type = df.loc['Sample type', 4]
+        _df = self._get_experimental_information_table()
+        sample_type = _df[_df.Name == 'Sample type'].Value
+        return(sample_type.strip())
 
     # subpanel: "Sample Type"
     def is_powder(self):
         """
         Is the 'Powder' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('powder'))
+        return("Powder" == self._get_sample_type())
+        # return(self._is_checkbox_enabled('powder'))
 
     def is_single_crystal(self):
         """
         Is the 'Single-Cystal' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('single_crystal'))
+        return("Single crystal" == self._get_sample_type())
+        # return(self._is_checkbox_enabled('single_crystal'))
+
+    def _get_remarks(self):
+        """
+        details.xhtml > Details
+        > Experimental information > Remarks
+        """
+
+        # remarks = df.loc['Remarks', 1]
+        remarks = list(df[df.Name == 'Remarks'].Value)
+        remarks = [s.strip() for s in remarks]
+        return(remarks)
 
     # subpanel: "Additional Information"
     def is_twinned_crystal_data(self):
         """
         Is the 'Twinned Crystal Data' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('twinned_crystal_data'))
+        remarks = self._get_remarks()
+        print(remarks)
+        return("Structure determined on a twinned crystal" in remarks)
+        # return("Single crystal" == self._get_sample_type())
+        # return(self._is_checkbox_enabled('twinned_crystal_data'))
 
     def is_rietveld_employed(self):
         """
         Is the 'Rietveld Refinement employed' checkbox enabled?
         """
+        remarks = self._get_remarks()
+        return("Rietveld profile refinement applied" in remarks)
         return(self._is_checkbox_enabled('rietveld_employed'))
 
     def is_absolute_config_determined(self):
         """
         Is the 'Absolute Configuration Determined' checkbox enabled?
+
+        Needs to check whether "Absolute Configuration Determined" is in remarks or not.
         """
-        return(self._is_checkbox_enabled('absolute_config_determined'))
+        remarks = self._get_remarks()
+        return("Absolute Configuration Determined" in remarks)
+        # return(self._is_checkbox_enabled('rietveld_employed'))
+
+        # return(self._is_checkbox_enabled('absolute_config_determined'))
 
     def is_experimental_PDF_number(self):
         """
