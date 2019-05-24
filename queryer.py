@@ -386,7 +386,7 @@ class Queryer(object):
             # uncomment the next few lines for automatic copying of CIF files
             # into the correct folders
             # wait for the file download to be completed
-            CIF_name = 'ICSD_Coll_Code_{}.cif'.format(coll_code)
+            CIF_name = 'ICSD_CollCode{}.cif'.format(coll_code)
             CIF_source_loc = os.path.join(self.download_dir, CIF_name)
             while True:
                 if os.path.exists(CIF_source_loc):
@@ -417,7 +417,11 @@ class Queryer(object):
         Use By.CLASS_NAME to locate the 'Next' button ('button_vcr_next'), and
         click it.
         """
-        self.driver.find_element_by_class_name('button_vcr_next').click()
+
+        self.wait_for_ajax()
+        element = self.driver.find_element_by_xpath("//button[@id='display_form:buttonNext']/span")
+        self.driver.execute_script("arguments[0].click();", element)
+        # self.driver.find_element_by_class_name('button_vcr_next').click()
 
     def parse_entry(self):
         """
@@ -498,7 +502,7 @@ class Queryer(object):
 
 
         _df = self._get_experimental_information_table()
-        pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string()
+        pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
         ic(pdf_number)
 
         # tag = ICSD_PARSE_TAGS['PDF_number']
@@ -1202,7 +1206,14 @@ class Queryer(object):
         """
         Is the 'Structure Prototype' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('is_structure_prototype'))
+        table = self.get_html_table(idx=7)
+        df = pd.read_html(table)[0]
+        ic(df)
+        df = self._parse_two_column_table(df)
+        return("Transformation info" in df.columns.values)
+        # temperature = df.loc['Temperature', 1]
+        # return(temperature.strip())
+        # return(self._is_checkbox_enabled('is_structure_prototype'))
 
     def export_CIF(self, base_filename='ICSD_Coll_Code'):
         """
@@ -1218,11 +1229,14 @@ class Queryer(object):
                            "[base_filename]_[ICSD Collection Code].cif", e.g.,
                            "ICSD_Coll_Code_18975.cif"
         """
-        filename_element = self.driver.find_element_by_id(
-            'fileNameForExportToCif')
-        filename_element.clear()
-        filename_element.send_keys(base_filename)
-        self.driver.find_element_by_id('aExportCifFile').click()
+        self.wait_for_ajax()
+        element = self.driver.find_element_by_xpath("//button[@id='display_form:btnEntryDownloadCif']/span[2]")
+        self.driver.execute_script("arguments[0].click();", element)
+        # filename_element = self.driver.find_element_by_id(
+        #     'fileNameForExportToCif')
+        # filename_element.clear()
+        # filename_element.send_keys(base_filename)
+        # self.driver.find_element_by_id('aExportCifFile').click()
 
     def save_screenshot(self, size=None, fname='ICSD.png'):
         """
