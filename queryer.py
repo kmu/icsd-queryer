@@ -11,6 +11,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
+from icecream import ic
+
 
 class QueryerError(Exception):
     pass
@@ -493,13 +495,11 @@ class Queryer(object):
 
         Return: (string) PDF-number if available, empty string otherwise
         """
-        pdf_number = ''
 
-        table = self.get_html_table(idx=17)
 
-        df = pd.read_html(table, index_col=0)
-
-        pdf_number = df.loc['PDF calc.', 1]
+        _df = self._get_experimental_information_table()
+        pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string()
+        ic(pdf_number)
 
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
@@ -512,7 +512,7 @@ class Queryer(object):
 
         # if nodes[0].text != 'R-value':
         #     pdf_number = nodes[0].text.split('\n')[0]
-        return(pdf_number)
+        return(pdf_number.strip())
 
     def get_authors(self):
         """
@@ -560,6 +560,19 @@ class Queryer(object):
         return(reference.strip().replace('\n', ' '))
 
     # panel: "Chemistry"
+    def _get_chemistry_table(self):
+        table = self.get_html_table(idx=2)
+        df = pd.read_html(table)
+        # df1 = df.loc[:, 0:1]
+        # df2 = df.loc[:, 3:5]
+
+        # df1.columns = ['Name', "Value"]
+        # df2.columns = ['Name', "Value"]
+
+        # df = pd.concat([df1, df2], axis=0)
+        df = self._parse_two_column_table(df)
+        return(df)
+
     def get_chemical_formula(self):
         """
         Use By.ID to locate 'Sum Form' ['textfieldChem1'], parse the elemnent
@@ -799,6 +812,29 @@ class Queryer(object):
         r = r.replace('\n', ' ')
         return(r)
 
+    def _parse_two_column_table(self, df):
+        df1 = df.loc[:, 0:1]
+        df2 = df.loc[:, 3:5]
+
+        df1.columns = ['Name', "Value"]
+        df2.columns = ['Name', "Value"]
+
+        df = pd.concat([df1, df2], axis=0)
+        return(df)
+
+    def _get_additional_info(self, key="Warnings"):
+        table = self.get_html_table(idx=18)
+
+        if '<table class="outputcontentpanel"></table>' == table:
+            return([])
+
+        df = pd.read_html(table)[0]
+        df = self._parse_two_column_tables(df)
+
+        warnings = df[df.Name == key].Value.tolist()
+        return(warnings)
+
+
     # panel: "Warnings & Comments"
     def get_warnings(self):
         """
@@ -809,8 +845,6 @@ class Queryer(object):
         Return: (list) A list of warnings if any, empty list otherwise
         """
 
-        print("Warnings are not captured.")
-        return([])
 
         # warnings = []
         # block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
@@ -819,7 +853,7 @@ class Queryer(object):
         # for node in warning_nodes:
         #     if node.text:
         #         warnings.append(node.text.strip().replace('\n', ' '))
-        return(warnings)
+        return(self._get_additional_info("Warnings"))
 
     def get_comments(self):
         """
@@ -829,17 +863,7 @@ class Queryer(object):
 
         Return: (list) A list of comments if any, empty list otherwise
         """
-        print("Comments are not captured.")
-        return([])
-        comments = []
-        block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
-        tag = ICSD_PARSE_TAGS['comments']
-        xpath = ".//div[text()[contains(., '{}')]]/../../div/div/div".format(tag)
-        comment_nodes = block_element.find_elements_by_xpath(xpath)
-        for node in comment_nodes:
-            if node.text:
-                comments.append(node.text.strip().replace('\n', ' '))
-        return(comments)
+        return(self._get_additional_info("Comments"))
 
     # panel: "Experimental Conditions"
     # text fields
@@ -921,9 +945,11 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Radiation type
         """
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=0)[0]
-        rad_type = df.loc['Radiation type', 1]
+        # table = self.get_html_table(idx=17)
+        # df = pd.read_html(table, index_col=0)[0]
+        # rad_type = df.loc['Radiation type', 1]
+        _df = self._get_experimental_information_table()
+        rad_type = _df[_df.Name == 'Radiation type'].Value.to_string()
         return(rad_type.strip())
 
     # subpanel: "Radiation Type"
@@ -963,19 +989,15 @@ class Queryer(object):
         table = self.get_html_table(idx=17)
         df = pd.read_html(table)[0]
 
-        df1 = df.loc[:, 0:1]
-        df2 = df.loc[:, 3:5]
+        # df1 = df.loc[:, 0:1]
+        # df2 = df.loc[:, 3:5]
 
-        df1.columns = ['Name', "Value"]
-        df2.columns = ['Name', "Value"]
+        # df1.columns = ['Name', "Value"]
+        # df2.columns = ['Name', "Value"]
 
-        print("df1")
-        print(df1)
-        print("df2")
-        print(df2)
+        # df = pd.concat([df1, df2], axis=0)
+        df = self._parse_two_column_table(df)
 
-        df = pd.concat([df1, df2], axis=0)
-        print(df)
         return(df)
 
     def _get_sample_type(self):
@@ -988,7 +1010,7 @@ class Queryer(object):
         # print(df)
         # sample_type = df.loc['Sample type', 4]
         _df = self._get_experimental_information_table()
-        sample_type = _df[_df.Name == 'Sample type'].Value
+        sample_type = _df[_df.Name == 'Sample type'].Value.to_string()
         return(sample_type.strip())
 
     # subpanel: "Sample Type"
@@ -1013,6 +1035,7 @@ class Queryer(object):
         """
 
         # remarks = df.loc['Remarks', 1]
+        df = self._get_experimental_information_table()
         remarks = list(df[df.Name == 'Remarks'].Value)
         remarks = [s.strip() for s in remarks]
         return(remarks)
@@ -1052,92 +1075,128 @@ class Queryer(object):
         """
         Is the 'Experimental PDF Number assigned' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('experimental_PDF_number)'))
+        _df = self._get_experimental_information_table()
+        # sample_type = _df[_df.Name == 'Sample type'].Value
+        return("PDF exp." in _df.columns.values)
+
+        # return(self._is_checkbox_enabled('experimental_PDF_number)'))
 
     def is_temperature_factors_available(self):
         """
         Is the 'Temperature Factors available' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('temperature_factors_available'))
+        remarks = self._get_remarks()
+        return("Temperature factors available" in remarks)
+        # return(self._is_checkbox_enabled('temperature_factors_available'))
 
     def is_magnetic_structure_available(self):
         """
         Is the 'Magnetic Structure Available' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('magnetic_structure_available'))
+        return(False) # Where can I find this?
+        # return(self._is_checkbox_enabled('magnetic_structure_available'))
 
     def is_anharmonic_temperature_factors_given(self):
         """
         Is the 'Anharmonic temperature factors given' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('anharmonic_temperature_factors_given'))
+        remarks = self._get_remarks()
+        return("Anharmonic temperature factors given" in remarks)
+        # return(self._is_checkbox_enabled('anharmonic_temperature_factors_given'))
 
     def is_calculated_PDF_number(self):
         """
         Is the 'Calculated PDF Number assigned' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('calculated_PDF_number'))
+        _df = self._get_experimental_information_table()
+        return("PDF calc." in _df.columns.values)
+        # return(self._is_checkbox_enabled('calculated_PDF_number'))
 
     def is_NMR_data_available(self):
         """
         Is the 'NMR Data available' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('NMR_data_available'))
+        remarks = self._get_remarks()
+        return("NMR spectroscopy data given" in remarks)
+        # return(self._is_checkbox_enabled('NMR_data_available'))
 
     def is_correction_of_previous(self):
         """
         Is the 'Correction of Earlier Work' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('correction_of_previous'))
+        # return(self._is_checkbox_enabled('correction_of_previous'))
+        remarks = self._get_remarks()
+        return("This publication corrects errors in an earlier one" in remarks)
 
     def is_cell_constants_without_sd(self):
         """
         Is the 'Cell Constants without s.d.' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('cell_constants_without_sd'))
+        # return(self._is_checkbox_enabled('cell_constants_without_sd'))
+        remarks = self._get_remarks()
+        return("Standard deviation missing in cell constants" in remarks)
 
     def is_only_cell_and_structure_type(self):
         """
         Is the 'Only Cell and Structure Type Determined' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('only_cell_and_structure_type'))
+        remarks = self._get_remarks()
+        return("Cell and Type only determined" in remarks)
 
     # subpanel: "Properties of Structure"
     def is_polytype(self):
         """
         Is the 'Polytype Structure' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('polytype'))
+        remarks = self._get_remarks()
+        return("Polytype structure" in remarks)
+        # return(self._is_checkbox_enabled('polytype'))
 
     def is_is_prototype_structure(self):
         """
         Is the 'Prototype Structure Type' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('is_prototype_structure'))
+        remarks = self._get_remarks()
+        for remark in remarks:
+            if "rototype" in remark:
+            #  Could not figure out where should I look
+                return(True)
+
+        return(False)
+        # return(self._is_checkbox_enabled('is_prototype_structure'))
 
     def is_order_disorder(self):
         """
         Is the 'Order/Disorder Structure' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('order_disorder'))
+        remarks = self._get_remarks()
+        return("Order-disorder structure" in remarks)
 
     def is_modulated_structure(self):
         """
         Is the 'Modulated Structure' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('modulated_structure'))
+        remarks = self._get_remarks()
+        return("Modulated structure" in remarks)
 
     def is_disordered(self):
         """
         Is the 'Disordered Structure' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('disordered'))
+        remarks = self._get_remarks()
+        return("Disordered structure that cannot adequately be described by numerical parameters" in remarks)
+        # return(self._is_checkbox_enabled('disordered'))
 
     def is_mineral(self):
         """
         Is the 'Mineral' checkbox enabled?
         """
-        return(self._is_checkbox_enabled('mineral'))
+        df = self._get_chemistry_table()
+        if "Mineral name" in df.columns.values:
+            return(True)
+
+        return(False)
+        # reeurn(self._is_checkbox_enabled('mineral'))
 
     def is_is_structure_prototype(self):
         """
