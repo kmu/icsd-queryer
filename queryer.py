@@ -11,8 +11,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 
-from icecream import ic
-
 
 class QueryerError(Exception):
     pass
@@ -488,7 +486,6 @@ class Queryer(object):
             self.soup = BeautifulSoup(self.driver.page_source, 'lxml')
             self.page_obatained = True
 
-        # ic(self.soup)
         table = self.soup.find_all('table')[idx]
 
         return(str(table))
@@ -506,16 +503,11 @@ class Queryer(object):
 
         _df = self._get_experimental_information_table()
         pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
-        ic(pdf_number)
 
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         # nodes = self.driver.find_elements_by_xpath(xpath)
         # # if PDF_number field is empty, return("" instead of )"R-value"
-
-        # from icecream import ic
-        # for node in nodes:
-        #     ic(node.text)
 
         # if nodes[0].text != 'R-value':
         #     pdf_number = nodes[0].text.split('\n')[0]
@@ -1211,7 +1203,6 @@ class Queryer(object):
         """
         table = self.get_html_table(idx=7)
         df = pd.read_html(table)[0]
-        ic(df)
         df = self._parse_two_column_table(df)
         return("Transformation info" in df.columns.values)
         # temperature = df.loc['Temperature', 1]
