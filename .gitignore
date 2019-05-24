@@ -5,3 +5,5 @@
 browser_data
 docs*
 .coverage
+meta_data.json
+*.cif
