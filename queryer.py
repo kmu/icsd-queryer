@@ -501,7 +501,7 @@ class Queryer(object):
         """
 
 
-        _df = self._get_experimental_information_table()
+        _df = self._get_experimental_information_panel()
         pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
 
         # tag = ICSD_PARSE_TAGS['PDF_number']
@@ -520,12 +520,9 @@ class Queryer(object):
 
         Return: (string) Authors if available, empty string otherwise
         """
-        authors = ''
-        tag = ICSD_PARSE_TAGS['authors']
-        xpath = "//td[text()[contains(., '{}')]]/../td".format(tag)
-        nodes = self.driver.find_elements_by_xpath(xpath)
-        authors = nodes[1].text.strip().replace('\n', ' ')
-        return(authors)
+        _df = self._get_summary_panel()
+        author = _df[_df.Name == 'Author'].Value.to_string(index=False)
+        return(author.strip().replace('\n', ' '))
 
     def get_publication_title(self):
         """
@@ -534,9 +531,8 @@ class Queryer(object):
 
         Return: (string) Publication title if available, empty string otherwise
         """
-        table = self.get_html_table(idx=0)
-        df = pd.read_html(table, index_col=3)
-        title = df.loc['Title', 4]
+        _df = self._get_summary_panel()
+        title = _df[_df.Name == 'Reference'].Value.to_string(index=False)
         return(title.strip().replace('\n', ' '))
 
         # element = self.driver.find_element_by_id('textfield13')
@@ -552,23 +548,21 @@ class Queryer(object):
         """
 
         # element = self.driver.find_element_by_id('textfield12')
-        table = self.get_html_table(idx=0)
-        df = pd.read_html(table, index_col=0)
-        reference = df.loc['Reference', 4]
-
+        _df = self._get_summary_panel()
+        reference = _df[_df.Name == 'Reference'].Value.to_string(index=False)
         return(reference.strip().replace('\n', ' '))
 
+    # panel: "Summary"
+    def _get_summary_panel(self):
+        table = self.get_html_table(idx=0)
+        df = pd.read_html(table)[0]
+        df = self._parse_two_column_table(df)
+        return(df)
+
     # panel: "Chemistry"
-    def _get_chemistry_table(self):
+    def _get_chemistry_panel(self):
         table = self.get_html_table(idx=2)
-        df = pd.read_html(table)
-        # df1 = df.loc[:, 0:1]
-        # df2 = df.loc[:, 3:5]
-
-        # df1.columns = ['Name', "Value"]
-        # df2.columns = ['Name', "Value"]
-
-        # df = pd.concat([df1, df2], axis=0)
+        df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
 
@@ -580,9 +574,12 @@ class Queryer(object):
         Return: (string) Chemical formula if available, empty string otherwise
         """
         # element = self.driver.find_element_by_id('textfieldChem1')
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table, index_col=0)
-        formula = df.loc['Sum. formula', 1]
+        # table = self.get_html_table(idx=2)
+        # df = pd.read_html(table, index_col=0)
+        _df = self._get_chemistry_panel()
+        # _df = self._parse_two_column_table(_df)
+        # formula = df.loc['Sum. formula', 1]
+        formula = _df[_df.Name == 'Sum. formula'].Value.to_string(index=False)
         return(formula.strip())
 
     def get_structural_formula(self):
@@ -592,9 +589,11 @@ class Queryer(object):
 
         Return: (string) Structural formula if available, empty string otherwise
         """
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table, index_col=3)
-        formula = df.loc['Struct. formula', 4]
+        # table = self.get_html_table(idx=2)
+        # df = pd.read_html(table, index_col=3)
+        # formula = df.loc['Struct. formula', 4]
+        _df = self._get_chemistry_panel()
+        formula = _df[_df.Name == 'Struct. formula'].Value.to_string(index=False)
         return(formula.strip())
 
     def get_AB_formula(self):
@@ -604,9 +603,8 @@ class Queryer(object):
 
         Return: (string) AB formula if available, empty string otherwise
         """
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table, index_col=3)
-        formula = df.loc['AB formula', 4]
+        _df = self._get_chemistry_panel()
+        formula = _df[_df.Name == 'AB formula'].Value.to_string(index=False)
         return(formula.strip())
 
     # panel: "Published Crystal Structure Data"
@@ -621,14 +619,18 @@ class Queryer(object):
                 (Lattice vectors are in Angstrom, angles in degrees.)
         """
         # element = self.driver.find_element_by_id('textfieldPub1')
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        raw_text = df.loc['Cell parameter', 1]
+        # table = self.get_html_table(idx=3)
+        # df = pd.read_html(table, index_col=0)
+        _df = self._get_published_crystal_structure_data_panel()
+        print(_df)
+        raw_text = _df[_df.Name == 'Cell parameter'].Value.to_string(index=False)
+        # raw_text = df.loc['Cell parameter', 1]
         raw_text = raw_text.strip()
         a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
                                        in raw_text.split()]
         cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
                            'gamma': gamma}
+        print(cell_parameters)
         assert a > 0
         assert b > 0
         assert c > 0
@@ -647,10 +649,9 @@ class Queryer(object):
 
         Return: (float) Volume in cubic Angstrom
         """
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        volume = df.loc['Cell volume', 1]
-        return(volume.strip())
+        _df = self._get_published_crystal_structure_data_panel()
+        raw_text = _df[_df.Name == 'Cell volume'].Value.to_string(index=False)
+        return(raw_text.strip())
 
     def get_space_group(self):
         """
@@ -661,13 +662,15 @@ class Queryer(object):
         """
 
         # Published Crystal Structure Data
+        _df = self._get_published_crystal_structure_data_panel()
+        raw_text = _df[_df.Name == 'Space group'].Value.to_string(index=False)
+        return(raw_text.strip())
+
+    def _get_published_crystal_structure_data_panel(self):
         table = self.get_html_table(idx=3)
-        df = pd.read_html(table)
-        # df = pd.read_html(table, index_col=3)
-        # print(df)
-        # volume = df.loc['Space group', 4]
-        space_group = df.iloc[0, 4]
-        return(space_group.strip())
+        df = pd.read_html(table, index_col=0)
+        df = self._parse_two_column_table(df)
+        return(df)
 
     def get_crystal_system(self):
         """
@@ -677,9 +680,9 @@ class Queryer(object):
         Return: (string) Crystal system if available, empty string otherwise
         """
         # Published Crystal Structure Data
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        system = df.loc['Crystal system', 1]
+
+        df = self._get_published_crystal_structure_data_panel()
+        system = _df[_df.Name == 'Crystal System'].Value.to_string(index=False)
         return(system.strip())
 
     def get_wyckoff_sequence(self):
@@ -690,14 +693,11 @@ class Queryer(object):
         Return: (string) Wyckoff sequence if available, empty string otherwise
         """
         # element = self.driver.find_element_by_id('textfieldPub11')
-
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        wyckoff = df.loc['Wyckoff sequence', 1]
+        df = self._get_published_crystal_structure_data_panel()
+        from icecream import ic
+        ic(df)
+        wyckoff = _df[_df.Name == 'Wyckoff sequence'].Value.to_string(index=False)
         return(wyckoff.strip())
-
-
-        return(element.get_attribute('value').strip())
 
     def get_formula_units_per_cell(self):
         """
@@ -721,12 +721,11 @@ class Queryer(object):
 
         Return: (string) Pearson symbol if available, empty string otherwise
         """
+        df = self._get_published_crystal_structure_data_panel()
 
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        df.to_csv('tmp.csv')
-        pearson = df.loc['Pearson symbol', 1]
+        pearson = _df[_df.Name == 'Pearson symbol'].Value.to_string(index=False)
         return(pearson.strip())
+
 
     def get_crystal_class(self):
         """
@@ -738,11 +737,9 @@ class Queryer(object):
 
         Return: (string) Crystal class if available, empty string otherwise
         """
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        crystal_class = df.iloc[2, 4]
-        # element = self.driver.find_element_by_id('textfieldPub9')
-        return(crystal_class.strip())
+        df = self._get_published_crystal_structure_data_panel()
+        crystalclass = _df[_df.Name == 'Crystal Class'].Value.to_string(index=False)
+        return(crystalclass.strip())
 
     def get_structural_prototype(self):
         """
@@ -812,6 +809,7 @@ class Queryer(object):
         return(r)
 
     def _parse_two_column_table(self, df):
+        assert df.shape[1] == 5
         df1 = df.loc[:, 0:1]
         df2 = df.loc[:, 3:5]
 
@@ -877,17 +875,9 @@ class Queryer(object):
 
         Return: (string) Temperature if available, empty string otherwise
         """
-        temperature = ''
-
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=0)
-        temperature = df.loc['Temperature', 1]
-        return(temperature.strip())
-        # tag = ICSD_PARSE_TAGS['temperature']
-        # xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
-        # nodes = self.driver.find_elements_by_xpath(xpath)
-        # temperature = nodes[0].get_attribute('value').strip()
-        return(temperature)
+        _df = self._get_experimental_information_panel()
+        raw_text = _df[_df.Name == 'Temperature'].Value.to_string(index=False)
+        return(raw_text.strip())
 
     def get_pressure(self):
         """
@@ -900,10 +890,9 @@ class Queryer(object):
 
         Return: (string) Pressure if available, empty string otherwise
         """
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=3)
-        pressure = df.loc['Pressure', 4]
-        return(pressure.strip())
+        _df = self._get_experimental_information_panel()
+        raw_text = _df[_df.Name == 'Pressure'].Value.to_string(index=False)
+        return(raw_text.strip())
 
     def get_R_value(self):
         """
@@ -916,10 +905,9 @@ class Queryer(object):
 
         Return: (float) R-value if available, None otherwise
         """
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=0)
-        pressure = df.loc['R-value', 1]
-        return(pressure.strip())
+        _df = self._get_experimental_information_panel()
+        raw_text = _df[_df.Name == 'R-value'].Value.to_string(index=False)
+        return(raw_text.strip())
 
     # checkboxes
     def _is_checkbox_enabled(self, tag_key):
@@ -947,8 +935,8 @@ class Queryer(object):
         # table = self.get_html_table(idx=17)
         # df = pd.read_html(table, index_col=0)[0]
         # rad_type = df.loc['Radiation type', 1]
-        _df = self._get_experimental_information_table()
-        rad_type = _df[_df.Name == 'Radiation type'].Value.to_string()
+        _df = self._get_experimental_information_panel()
+        rad_type = _df[_df.Name == 'Radiation type'].Value.to_string(index=False)
         return(rad_type.strip())
 
     # subpanel: "Radiation Type"
@@ -984,7 +972,7 @@ class Queryer(object):
         return('Synchrotron' == self._get_radiation_type())
         # return(self._is_checkbox_enabled('synchrotron'))
 
-    def _get_experimental_information_table(self):
+    def _get_experimental_information_panel(self):
         table = self.get_html_table(idx=17)
         df = pd.read_html(table)[0]
 
@@ -1008,8 +996,8 @@ class Queryer(object):
         # df = pd.read_html(table, index_col=3)[0]
         # print(df)
         # sample_type = df.loc['Sample type', 4]
-        _df = self._get_experimental_information_table()
-        sample_type = _df[_df.Name == 'Sample type'].Value.to_string()
+        _df = self._get_experimental_information_panel()
+        sample_type = _df[_df.Name == 'Sample type'].Value.to_string(index=False)
         return(sample_type.strip())
 
     # subpanel: "Sample Type"
@@ -1034,7 +1022,7 @@ class Queryer(object):
         """
 
         # remarks = df.loc['Remarks', 1]
-        df = self._get_experimental_information_table()
+        df = self._get_experimental_information_panel()
         remarks = list(df[df.Name == 'Remarks'].Value)
         remarks = [s.strip() for s in remarks]
         return(remarks)
@@ -1045,7 +1033,6 @@ class Queryer(object):
         Is the 'Twinned Crystal Data' checkbox enabled?
         """
         remarks = self._get_remarks()
-        print(remarks)
         return("Structure determined on a twinned crystal" in remarks)
         # return("Single crystal" == self._get_sample_type())
         # return(self._is_checkbox_enabled('twinned_crystal_data'))
@@ -1074,7 +1061,7 @@ class Queryer(object):
         """
         Is the 'Experimental PDF Number assigned' checkbox enabled?
         """
-        _df = self._get_experimental_information_table()
+        _df = self._get_experimental_information_panel()
         # sample_type = _df[_df.Name == 'Sample type'].Value
         return("PDF exp." in _df.columns.values)
 
@@ -1107,7 +1094,7 @@ class Queryer(object):
         """
         Is the 'Calculated PDF Number assigned' checkbox enabled?
         """
-        _df = self._get_experimental_information_table()
+        _df = self._get_experimental_information_panel()
         return("PDF calc." in _df.columns.values)
         # return(self._is_checkbox_enabled('calculated_PDF_number'))
 
@@ -1190,7 +1177,7 @@ class Queryer(object):
         """
         Is the 'Mineral' checkbox enabled?
         """
-        df = self._get_chemistry_table()
+        df = self._get_chemistry_panel()
         if "Mineral name" in df.columns.values:
             return(True)
 
