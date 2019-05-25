@@ -62,9 +62,13 @@ class TestQueryer(unittest.TestCase):
         assertion = True
 
         for key, expected in expected_dict.items():
-            if expected != crawled_dict[key]:
+            if key in crawled_dict.keys():
+                if expected != crawled_dict[key]:
+                    assertion = False
+                    print(expected, crawled_dict[key])
+            else:
                 assertion = False
-                print(expected, crawled_dict[key])
+                print("Key {} is missing for the crawled data".format(key))
 
         assert assertion
 
