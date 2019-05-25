@@ -668,7 +668,7 @@ class Queryer(object):
 
     def _get_published_crystal_structure_data_panel(self):
         table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
+        df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
 
@@ -694,8 +694,6 @@ class Queryer(object):
         """
         # element = self.driver.find_element_by_id('textfieldPub11')
         df = self._get_published_crystal_structure_data_panel()
-        from icecream import ic
-        ic(df)
         wyckoff = _df[_df.Name == 'Wyckoff sequence'].Value.to_string(index=False)
         return(wyckoff.strip())
 
