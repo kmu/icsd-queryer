@@ -622,7 +622,6 @@ class Queryer(object):
         # table = self.get_html_table(idx=3)
         # df = pd.read_html(table, index_col=0)
         _df = self._get_published_crystal_structure_data_panel()
-        print(_df)
         raw_text = _df[_df.Name == 'Cell parameter'].Value.to_string(index=False)
         # raw_text = df.loc['Cell parameter', 1]
         raw_text = raw_text.strip()
@@ -630,7 +629,6 @@ class Queryer(object):
                                        in raw_text.split()]
         cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
                            'gamma': gamma}
-        print(cell_parameters)
         assert a > 0
         assert b > 0
         assert c > 0
@@ -651,6 +649,8 @@ class Queryer(object):
         """
         _df = self._get_published_crystal_structure_data_panel()
         raw_text = _df[_df.Name == 'Cell volume'].Value.to_string(index=False)
+        raw_text.strip()
+        raw_text = raw_text.split()[0]
         return(raw_text.strip())
 
     def get_space_group(self):
@@ -681,7 +681,7 @@ class Queryer(object):
         """
         # Published Crystal Structure Data
 
-        df = self._get_published_crystal_structure_data_panel()
+        _df = self._get_published_crystal_structure_data_panel()
         system = _df[_df.Name == 'Crystal System'].Value.to_string(index=False)
         return(system.strip())
 
@@ -693,7 +693,7 @@ class Queryer(object):
         Return: (string) Wyckoff sequence if available, empty string otherwise
         """
         # element = self.driver.find_element_by_id('textfieldPub11')
-        df = self._get_published_crystal_structure_data_panel()
+        _df = self._get_published_crystal_structure_data_panel()
         wyckoff = _df[_df.Name == 'Wyckoff sequence'].Value.to_string(index=False)
         return(wyckoff.strip())
 
@@ -719,7 +719,7 @@ class Queryer(object):
 
         Return: (string) Pearson symbol if available, empty string otherwise
         """
-        df = self._get_published_crystal_structure_data_panel()
+        _df = self._get_published_crystal_structure_data_panel()
 
         pearson = _df[_df.Name == 'Pearson symbol'].Value.to_string(index=False)
         return(pearson.strip())
@@ -735,7 +735,7 @@ class Queryer(object):
 
         Return: (string) Crystal class if available, empty string otherwise
         """
-        df = self._get_published_crystal_structure_data_panel()
+        _df = self._get_published_crystal_structure_data_panel()
         crystalclass = _df[_df.Name == 'Crystal Class'].Value.to_string(index=False)
         return(crystalclass.strip())
 
@@ -824,6 +824,8 @@ class Queryer(object):
             return([])
 
         df = pd.read_html(table)[0]
+        from icecream import ic
+        ic(df)
         df = self._parse_two_column_tables(df)
 
         warnings = df[df.Name == key].Value.tolist()
