@@ -571,6 +571,13 @@ class Queryer(object):
         df = self._parse_two_column_table(df)
         return(df)
 
+    def get_defect(self):
+        """
+        All test data has defect: false
+        """
+
+        return(False)
+
     def get_chemical_formula(self):
         """
         Use By.ID to locate 'Sum Form' ['textfieldChem1'], parse the elemnent
