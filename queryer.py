@@ -502,7 +502,6 @@ class Queryer(object):
         Return: (string) PDF-number if available, empty string otherwise
         """
 
-
         _df = self._get_experimental_information_panel()
         pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
 
@@ -537,7 +536,7 @@ class Queryer(object):
         Return: (string) Publication title if available, empty string otherwise
         """
         _df = self._get_summary_panel()
-        title = _df[_df.Name == 'Reference'].Value.to_string(index=False)
+        title = _df[_df.Name == 'Title'].Value.to_string(index=False)
         return(title.strip().replace('\n', ' '))
 
         # element = self.driver.find_element_by_id('textfield13')
@@ -671,9 +670,12 @@ class Queryer(object):
         """
         _df = self._get_published_crystal_structure_data_panel()
         raw_text = _df[_df.Name == 'Cell volume'].Value.to_string(index=False)
+        #
         raw_text.strip()
         raw_text = raw_text.split()[0]
-        return(raw_text.strip())
+        volume = float(raw_text)
+
+        return(volume)
 
     def get_space_group(self):
         """
@@ -686,6 +688,7 @@ class Queryer(object):
         # Published Crystal Structure Data
         _df = self._get_published_crystal_structure_data_panel()
         raw_text = _df[_df.Name == 'Space group'].Value.to_string(index=False)
+        raw_text =  raw_text.replace(" (", "(")
         return(raw_text.strip())
 
     def _get_published_crystal_structure_data_panel(self):
@@ -727,13 +730,14 @@ class Queryer(object):
         """
         Use By.ID to locate 'Formula Units per Cell' ['textfieldPub3'], parse
         its 'value' attribute.
-
         Return: (integer) Formula units per unit cell
         """
-        print("'Formula Units per Cell' seems to be removed")
-        return("")
-        element = self.driver.find_element_by_id('textfieldPub3')
-        return(int(element.get_attribute('value').strip()))
+        # element = self.driver.find_element_by_id('textfieldPub3')
+        # return(int(element.get_attribute('value').strip()))
+
+        _df = self._get_published_crystal_structure_data_panel()
+        z = _df[_df.Name == 'Z'].Value.to_string(index=False)
+        return(int(z.strip()))
 
     def get_pearson(self):
         """
@@ -850,13 +854,15 @@ class Queryer(object):
     def _get_additional_info(self, key="Warnings"):
         table = self.get_html_table(idx=18)
 
+        from icecream import ic
+
         if '<table class="outputcontentpanel"></table>' == table:
             return([])
 
         df = pd.read_html(table)[0]
-        from icecream import ic
         ic(df)
-        df = self._parse_two_column_tables(df)
+        df = self._parse_two_column_table(df)
+        ic(df)
 
         warnings = df[df.Name == key].Value.tolist()
         return(warnings)
@@ -907,6 +913,7 @@ class Queryer(object):
         """
         _df = self._get_experimental_information_panel()
         raw_text = _df[_df.Name == 'Temperature'].Value.to_string(index=False)
+        raw_text = raw_text.replace("[", "").replace("]", "")
         return(raw_text.strip())
 
     def get_pressure(self):
@@ -939,8 +946,8 @@ class Queryer(object):
         raw_text = _df[_df.Name == 'R-value'].Value.to_string(index=False)
 
         if raw_text == "Series([], )":
-            return("")
-        return(raw_text.strip())
+            return(None)
+        return(float(raw_text.strip()))
 
     # checkboxes
     def _is_checkbox_enabled(self, tag_key):
@@ -980,7 +987,9 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Radiation Type
         """
-        return('X-ray' == self._get_radiation_type())
+        rad_type = self._get_radiation_type()
+
+        return('X-Ray' == rad_type)
 
         # return(self._is_checkbox_enabled('x_ray'))
 
