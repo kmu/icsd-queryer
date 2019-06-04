@@ -6,6 +6,8 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 
+pd.options.display.max_colwidth = 1000
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -628,6 +630,7 @@ class Queryer(object):
         raw_text = _df[_df.Name == 'Cell parameter'].Value.to_string(index=False)
         # raw_text = df.loc['Cell parameter', 1]
         raw_text = raw_text.strip()
+
         a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
                                        in raw_text.split()]
         cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
