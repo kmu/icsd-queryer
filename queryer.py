@@ -602,6 +602,19 @@ class Queryer(object):
         formula = _df[_df.Name == 'Sum. formula'].Value.to_string(index=False)
         return(formula.strip())
 
+    def is_theoretical_calculation(self):
+        headers = self.soup.findAll("div", {"class": "ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"})
+        from icecream import ic
+        headers = [h.text for h in headers]
+
+        if "Experimental information" in headers:
+            return(False)
+
+        elif "Theoretical information" in headers:
+            return(True)
+
+        return(None)
+
     def get_structural_formula(self):
         """
         Use By.ID to locate 'Struct. Form.' ['textfieldChem3'], parse the
