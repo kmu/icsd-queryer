@@ -14,6 +14,9 @@ is_mac = platform.system() == 'Darwin'
 
 class TestQueryer(unittest.TestCase):
 
+    def setUp(self):
+        self.maxDiff = None
+
     def test_dummy_data(self):
         queryer = Queryer()
 
@@ -70,7 +73,8 @@ class TestQueryer(unittest.TestCase):
                 assertion = False
                 print("Key {} is missing for the crawled data".format(key))
 
-        assert assertion
+        # assert assertion
+        self.assertDictEqual(expected_dict, crawled_dict)
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_cell_parameter(self):
@@ -91,14 +95,19 @@ class TestQueryer(unittest.TestCase):
 
         # self.maxDiff = None
         # self.assertDictEqual(expected, crawled)
+        self.assertDictEqual(expected_dict, crawled_dict)
+
         assertion = True
 
         for key, expected in expected_dict.items():
             if expected != crawled_dict[key]:
                 assertion = False
+                print("=======================")
+                print("Mismatch in {}".format(key))
                 print(expected, crawled_dict[key])
 
-        assert assertion
+        # assert assertion
+        self.assertDictEqual(expected_dict, crawled_dict)
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_random(self):
@@ -123,9 +132,47 @@ class TestQueryer(unittest.TestCase):
         # self.assertDictEqual(expected, crawled)
         assertion = True
 
+        self.assertDictEqual(expected_dict, crawled_dict)
+
         for key, expected in expected_dict.items():
             if expected != crawled_dict[key]:
                 assertion = False
+                print("=======================")
+                print("Mismatch in {}".format(key))
                 print(expected, crawled_dict[key])
 
-        assert assertion
+        # assert assertion
+        self.assertDictEqual(expected_dict, crawled_dict)
+
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
+    def test_reference_3(self):
+        # This entry does not have DOI.
+        code = 5151
+        query = {
+            "icsd_collection_code": code,
+        }
+
+        queryer = Queryer(query=query)
+        queryer.perform_icsd_query()
+        self.assertEqual(1, queryer.hits)
+
+        with open("expected/{}/meta_data.json".format(code)) as f:
+            expected_dict = json.load(f)
+
+        with open("{}/meta_data.json".format(code)) as f:
+            crawled_dict = json.load(f)
+
+        # self.maxDiff = None
+        # self.assertDictEqual(expected, crawled)
+        assertion = True
+
+        self.assertDictEqual(expected_dict, crawled_dict)
+
+        for key, expected in expected_dict.items():
+            if expected != crawled_dict[key]:
+                assertion = False
+                print("=======================")
+                print("Mismatch in {}".format(key))
+                print(expected, crawled_dict[key])
+
+        self.assertDictEqual(expected_dict, crawled_dict)

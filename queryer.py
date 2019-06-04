@@ -543,6 +543,15 @@ class Queryer(object):
         # element = self.driver.find_element_by_id('textfield13')
         # return(element.text.strip().replace('\n', ' '))
 
+    def get_doi(self):
+        _df = self._get_summary_panel()
+        doi = _df[_df.Name == 'DOI'].Value
+        if len(doi) == 0:
+            return("")
+
+        doi = doi.to_string(index=False)
+        return(doi.strip().replace('\n', ' '))
+
     def get_reference(self):
         """
         Use By.ID to locate 'Reference' for the publication ['textfield12'],
