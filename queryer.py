@@ -704,7 +704,7 @@ class Queryer(object):
         # Published Crystal Structure Data
 
         _df = self._get_published_crystal_structure_data_panel()
-        system = _df[_df.Name == 'Crystal System'].Value.to_string(index=False)
+        system = _df[_df.Name == 'Crystal system'].Value.to_string(index=False)
 
         if system == "Series([], )":
             return("")
@@ -762,7 +762,7 @@ class Queryer(object):
         Return: (string) Crystal class if available, empty string otherwise
         """
         _df = self._get_published_crystal_structure_data_panel()
-        crystalclass = _df[_df.Name == 'Crystal Class'].Value.to_string(index=False)
+        crystalclass = _df[_df.Name == 'Crystal class'].Value.to_string(index=False)
 
         if crystalclass == "Series([], )":
             return("")
@@ -1025,10 +1025,6 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Sample type
         """
-        # table = self.get_html_table(idx=17)
-        # df = pd.read_html(table, index_col=3)[0]
-        # print(df)
-        # sample_type = df.loc['Sample type', 4]
         _df = self._get_experimental_information_panel()
         sample_type = _df[_df.Name == 'Sample type'].Value.to_string(index=False)
         return(sample_type.strip())
