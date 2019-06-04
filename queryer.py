@@ -503,11 +503,18 @@ class Queryer(object):
         """
 
         _df = self._get_experimental_information_panel()
-        pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
-
-        if pdf_number == "Series([], )":
+        from icecream import ic
+        ic(_df)
+        pdf_number = _df[_df.Name == 'PDF calc.'].Value
+        if len(pdf_number) == 0:
             return("")
 
+        pdf_number = pdf_number.to_string(index=False)
+
+        pdf_number = pdf_number.strip()
+
+        # if pdf_number == 'R-value':
+            # return("")
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         # nodes = self.driver.find_elements_by_xpath(xpath)
@@ -515,7 +522,7 @@ class Queryer(object):
 
         # if nodes[0].text != 'R-value':
         #     pdf_number = nodes[0].text.split('\n')[0]
-        return(pdf_number.strip())
+        return(pdf_number)
 
     def get_authors(self):
         """
