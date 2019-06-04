@@ -795,14 +795,21 @@ class Queryer(object):
 
     def get_structural_prototype(self):
         """
-        Probably abolished?
-
         Use By.ID to locate 'Structure Type' ['textfieldPub12'], parse its
         'value' attribute.
 
         Return: (string) Structure type if available, empty string otherwise
         """
-        return("")
+        _df = self._get_published_crystal_structure_data_panel()
+
+        stype = _df[_df.Name == 'Structure type'].Value
+
+        if len(stype) == 0:
+            return("")
+
+        crystalclass = stype.to_string(index=False)
+        return(crystalclass.strip())
+        # return("")
 
     # panel: "Bibliography"
     def _get_references(self, n):
