@@ -827,6 +827,7 @@ class Queryer(object):
         xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         nodes = self.driver.find_elements_by_xpath(xpath)
         reference = self._clean_reference_string(nodes[n].text)
+        from icecream import ic
         return(reference)
 
     def get_reference_1(self):
@@ -839,19 +840,27 @@ class Queryer(object):
 
     def get_reference_2(self):
         """
+        '2nd Reference' seems to be abolished on ICSD 4.2.0.
+        Following comments are for previous versions
+
         Parse '2nd Reference' on the 'Detailed View' page.
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return(self._get_references(1))
+        return("")
+        # return(self._get_references(1))
 
     def get_reference_3(self):
         """
+        '2nd Reference' seems to be abolished on ICSD 4.2.0.
+        Following comments are for previous versions
+
         Parse '3rd Reference' on the 'Detailed View' page.
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return(self._get_references(2))
+        return("")
+        # return(self._get_references(2))
 
     def _clean_reference_string(self, r):
         """
@@ -881,15 +890,11 @@ class Queryer(object):
     def _get_additional_info(self, key="Warnings"):
         table = self.get_html_table(idx=18)
 
-        from icecream import ic
-
         if '<table class="outputcontentpanel"></table>' == table:
             return([])
 
         df = pd.read_html(table)[0]
-        ic(df)
         df = self._parse_two_column_table(df)
-        ic(df)
 
         warnings = df[df.Name == key].Value.tolist()
         return(warnings)
@@ -1070,7 +1075,7 @@ class Queryer(object):
         """
         Is the 'Powder' checkbox enabled?
         """
-        return("Powder" == self._get_sample_type())
+        return("Powder data" == self._get_sample_type())
         # return(self._is_checkbox_enabled('powder'))
 
     def is_single_crystal(self):
@@ -1243,7 +1248,8 @@ class Queryer(object):
         Is the 'Mineral' checkbox enabled?
         """
         df = self._get_chemistry_panel()
-        if "Mineral name" in df.columns.values:
+        from icecream import ic
+        if "Mineral name" in df.Name.values:
             return(True)
 
         return(False)
