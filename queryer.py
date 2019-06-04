@@ -504,6 +504,9 @@ class Queryer(object):
         _df = self._get_experimental_information_panel()
         pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
 
+        if pdf_number == "Series([], )":
+            return("")
+
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         # nodes = self.driver.find_elements_by_xpath(xpath)
@@ -683,6 +686,10 @@ class Queryer(object):
 
         _df = self._get_published_crystal_structure_data_panel()
         system = _df[_df.Name == 'Crystal System'].Value.to_string(index=False)
+
+        if system == "Series([], )":
+            return("")
+
         return(system.strip())
 
     def get_wyckoff_sequence(self):
@@ -737,6 +744,10 @@ class Queryer(object):
         """
         _df = self._get_published_crystal_structure_data_panel()
         crystalclass = _df[_df.Name == 'Crystal Class'].Value.to_string(index=False)
+
+        if crystalclass == "Series([], )":
+            return("")
+
         return(crystalclass.strip())
 
     def get_structural_prototype(self):
@@ -907,6 +918,9 @@ class Queryer(object):
         """
         _df = self._get_experimental_information_panel()
         raw_text = _df[_df.Name == 'R-value'].Value.to_string(index=False)
+
+        if raw_text == "Series([], )":
+            return("")
         return(raw_text.strip())
 
     # checkboxes
