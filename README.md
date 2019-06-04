@@ -20,3 +20,9 @@ nosetests tests/*  --with-coverage    --cover-package .  --nocapture
 ```
 
 Some of the tests randomly pick up expected files and compared them with newly obtained data.
+
+
+## Change from previous versions
+
+- `reference_1`, `reference_2`, and `reference_3` are abolished.
+- `DOI` key is introduced.
