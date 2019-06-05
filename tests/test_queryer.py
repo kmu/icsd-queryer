@@ -97,9 +97,44 @@ class TestQueryer(unittest.TestCase):
         self.assertDictEqual(expected_dict, crawled_dict)
 
 
+
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
+    def test_electron(self):
+        """
+        This entry does not have DOI.
+        ICSD ver. 2017 had multiple references,
+        while ICSD ver. 2019 does not have.
+        """
+        code = 251504
+        query = {
+            "icsd_collection_code": code,
+        }
+
+        queryer = Queryer(query=query)
+        queryer.perform_icsd_query()
+        self.assertEqual(1, queryer.hits)
+
+        with open("expected/{}/meta_data.json".format(code)) as f:
+            expected_dict = json.load(f)
+
+        with open("{}/meta_data.json".format(code)) as f:
+            crawled_dict = json.load(f)
+
+        for key in new_keys + conflicting_keys:
+            del crawled_dict[key]
+
+        for key in abolished_keys + conflicting_keys:
+            del expected_dict[key]
+
+        self.assertDictEqual(expected_dict, crawled_dict)
+
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_reference_3(self):
-        # This entry does not have DOI.
+        """
+        This entry does not have DOI.
+        ICSD ver. 2017 had multiple references,
+        while ICSD ver. 2019 does not have.
+        """
         code = 5151
         query = {
             "icsd_collection_code": code,
