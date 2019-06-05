@@ -28,7 +28,7 @@ class Queryer(object):
                  url=None,
                  query=None,
                  save_screenshot=None,
-                 structure_source=None):
+                 structure_source='E'):
         """
         Initialize the webdriver and load the URL.
         (Also, check if the "Basic Search" page has loaded successfully.)
@@ -57,7 +57,6 @@ class Queryer(object):
                 (Default: False)
 
             structure_source:
-                **NOT IMPLEMENTED**
                 String specifying whether the search should be limited to only
                 experimental structures, theoretical structures, or both.
                 Options: "E"/"T"/"A" for experimental/theoretical/all structures
@@ -193,9 +192,12 @@ class Queryer(object):
         sources.
         """
         if self.structure_source == 'E':
+            # Experim. inorganic structures
             return
-        tag_dict = {'T': 'Theoretical Structures only',
+
+        tag_dict = {'T': 'Theoretical structures',
                     'A': 'All Structures'}
+
         number_tag = tag_dict.get(self.structure_source)
         xpath = "//table/tbody/tr/td/label[text()[contains(., '{}')]]".format(
             tag_dict[self.structure_source])
@@ -1308,7 +1310,7 @@ class Queryer(object):
         """
         Post the query to form, parse data for all the entries. (wrapper)
         """
-        # self.select_structure_source()
+        self.select_structure_source()
         self.post_query_to_form()
         self._click_select_all()
         self._click_show_detailed_view()
