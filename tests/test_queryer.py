@@ -8,6 +8,7 @@ import json
 import glob
 import random
 from tests.test_random import abolished_keys, new_keys,conflicting_keys
+import time
 
 
 is_mac = platform.system() == 'Darwin'
@@ -17,6 +18,7 @@ class TestQueryer(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
+        time.sleep(5)
 
     def test_dummy_data(self):
         queryer = Queryer()

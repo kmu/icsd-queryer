@@ -395,6 +395,7 @@ class Queryer(object):
             CIF_source_loc = os.path.join(self.download_dir, CIF_name)
             while True:
                 if os.path.exists(CIF_source_loc):
+                    time.sleep(0.1)
                     break
                 else:
                     time.sleep(0.1)
