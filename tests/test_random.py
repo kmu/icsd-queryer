@@ -19,6 +19,24 @@ class TestRandom(unittest.TestCase):
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_random(self):
+        abolished_keys = ["misfit_layer"]
+        new_keys = [
+            'doi',
+            "experimental_PDF_number",
+            "is_structure_prototype",
+            "cell_constants_without_sd",
+            "calculated_PDF_number",
+            "modulated_structure",
+            "only_cell_and_structure_type",
+            "temperature_factors_available"
+        ]
+        confclicting_keys = [
+            'PDF_number',  #  2017 version returns 'R-value' by a bug
+            "reference",
+            'reference_1',  #  2017 version has uncleaned entry
+            "comments"  #  Order of multiple comments can be different
+        ]
+
         paths = glob.glob("expected/*")
         path = random.choice(paths)
         code = path.split("/")[-1]
@@ -36,18 +54,12 @@ class TestRandom(unittest.TestCase):
         with open("{}/meta_data.json".format(code)) as f:
             crawled_dict = json.load(f)
 
-        # self.maxDiff = None
-        # self.assertDictEqual(expected, crawled)
-        assertion = True
+        self.assertCountEqual(crawled_dict['comments'], expected_dict['comments'])
 
-        self.assertDictEqual(expected_dict, crawled_dict)
+        for key in new_keys + confclicting_keys:
+            del crawled_dict[key]
 
-        for key, expected in expected_dict.items():
-            if expected != crawled_dict[key]:
-                assertion = False
-                print("=======================")
-                print("Mismatch in {}".format(key))
-                print(expected, crawled_dict[key])
+        for key in abolished_keys + confclicting_keys:
+            del expected_dict[key]
 
-        # assert assertion
         self.assertDictEqual(expected_dict, crawled_dict)
