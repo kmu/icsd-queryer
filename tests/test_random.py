@@ -24,12 +24,15 @@ new_keys = [
     "temperature_factors_available"
 ]
 conflicting_keys = [
-    'PDF_number',  # 2017 version returns 'R-value' by a bug
+    'PDF_number',  # queryer ver. 2017 returns 'R-value' by a bug
     "reference",
-    'reference_1',  # 2017 version has uncleaned entry
+    'reference_1',  # queryer ver. 2017 has uncleaned entry
+    'reference_2',  # ICSD ver. 2017 had multiple references,
+    'reference_3',  # while ICSD ver. 2019 does not have.
     "comments",
     # Order of multiple comments
-    # can be different. Tested below
+    # can be different. Tested below.
+    # Additional comments can be added depending on versions
     "structural_prototype",
     # Generally consistent, but can be divided
     # by different values. see ICSD195556.
