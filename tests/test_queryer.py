@@ -7,6 +7,7 @@ import platform
 import json
 import glob
 import random
+from tests.test_random import abolished_keys, new_keys,conflicting_keys
 
 
 is_mac = platform.system() == 'Darwin'
@@ -59,22 +60,14 @@ class TestQueryer(unittest.TestCase):
         with open("5013/meta_data.json") as f:
             crawled_dict = json.load(f)
 
-        # self.maxDiff = None
-        # self.assertDictEqual(expected, crawled)
+        for key in new_keys + conflicting_keys:
+            del crawled_dict[key]
 
-        assertion = True
+        for key in abolished_keys + conflicting_keys:
+            del expected_dict[key]
 
-        for key, expected in expected_dict.items():
-            if key in crawled_dict.keys():
-                if expected != crawled_dict[key]:
-                    assertion = False
-                    print(expected, crawled_dict[key])
-            else:
-                assertion = False
-                print("Key {} is missing for the crawled data".format(key))
-
-        # assert assertion
         self.assertDictEqual(expected_dict, crawled_dict)
+
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_cell_parameter(self):
@@ -93,20 +86,12 @@ class TestQueryer(unittest.TestCase):
         with open("{}/meta_data.json".format(code)) as f:
             crawled_dict = json.load(f)
 
-        # self.maxDiff = None
-        # self.assertDictEqual(expected, crawled)
-        self.assertDictEqual(expected_dict, crawled_dict)
+        for key in new_keys + conflicting_keys:
+            del crawled_dict[key]
 
-        assertion = True
+        for key in abolished_keys + conflicting_keys:
+            del expected_dict[key]
 
-        for key, expected in expected_dict.items():
-            if expected != crawled_dict[key]:
-                assertion = False
-                print("=======================")
-                print("Mismatch in {}".format(key))
-                print(expected, crawled_dict[key])
-
-        # assert assertion
         self.assertDictEqual(expected_dict, crawled_dict)
 
 
@@ -128,17 +113,10 @@ class TestQueryer(unittest.TestCase):
         with open("{}/meta_data.json".format(code)) as f:
             crawled_dict = json.load(f)
 
-        # self.maxDiff = None
-        # self.assertDictEqual(expected, crawled)
-        assertion = True
+        for key in new_keys + conflicting_keys:
+            del crawled_dict[key]
 
-        self.assertDictEqual(expected_dict, crawled_dict)
-
-        for key, expected in expected_dict.items():
-            if expected != crawled_dict[key]:
-                assertion = False
-                print("=======================")
-                print("Mismatch in {}".format(key))
-                print(expected, crawled_dict[key])
+        for key in abolished_keys + conflicting_keys:
+            del expected_dict[key]
 
         self.assertDictEqual(expected_dict, crawled_dict)
