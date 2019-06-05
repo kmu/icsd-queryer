@@ -960,6 +960,7 @@ class Queryer(object):
         """
         _df = self._get_experimental_information_panel()
         raw_text = _df[_df.Name == 'Pressure'].Value.to_string(index=False)
+        raw_text = raw_text.replace("[", "").replace("]", "")
         return(raw_text.strip())
 
     def get_R_value(self):
@@ -1028,7 +1029,7 @@ class Queryer(object):
         """
         Is the 'Electrons' checkbox enabled?
         """
-        return('Electrons' == self._get_radiation_type())
+        return('Electron' == self._get_radiation_type())
         # return(self._is_checkbox_enabled('electron_diffraction'))
 
     def is_neutron_diffraction(self):
