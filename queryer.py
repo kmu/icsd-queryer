@@ -503,8 +503,6 @@ class Queryer(object):
         """
 
         _df = self._get_experimental_information_panel()
-        from icecream import ic
-        ic(_df)
         pdf_number = _df[_df.Name == 'PDF calc.'].Value
         if len(pdf_number) == 0:
             return("")
@@ -611,7 +609,6 @@ class Queryer(object):
 
     def is_theoretical_calculation(self):
         headers = self.soup.findAll("div", {"class": "ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"})
-        from icecream import ic
         headers = [h.text for h in headers]
 
         if "Experimental information" in headers:
@@ -827,7 +824,6 @@ class Queryer(object):
         xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         nodes = self.driver.find_elements_by_xpath(xpath)
         reference = self._clean_reference_string(nodes[n].text)
-        from icecream import ic
         return(reference)
 
     def get_reference_1(self):
@@ -1248,7 +1244,6 @@ class Queryer(object):
         Is the 'Mineral' checkbox enabled?
         """
         df = self._get_chemistry_panel()
-        from icecream import ic
         if "Mineral name" in df.Name.values:
             return(True)
 
