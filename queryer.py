@@ -1036,7 +1036,7 @@ class Queryer(object):
         """
         Is the 'Neutrons' checkbox enabled?
         """
-        return('Neutrons' == self._get_radiation_type())
+        return('Neutron' == self._get_radiation_type())
         # return(self._is_checkbox_enabled('neutron_diffraction'))
 
     def is_synchrotron(self):
