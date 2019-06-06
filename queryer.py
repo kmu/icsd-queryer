@@ -195,6 +195,7 @@ class Queryer(object):
             # Experim. inorganic structures
             return
 
+        self.wait_for_ajax()
         tag_dict = {'T': 'Theoretical structures',
                     'A': 'All Structures'}
 
@@ -203,6 +204,9 @@ class Queryer(object):
             tag_dict[self.structure_source])
         radio_label = self.driver.find_element_by_xpath(xpath)
         radio_label.click()
+        # time.sleep(10)
+        self.wait_for_ajax()
+        # self.driver.manage().timeouts().implicitlyWait()
 
     def post_query_to_form(self):
         """
