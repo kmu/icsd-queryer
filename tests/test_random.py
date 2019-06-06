@@ -21,7 +21,8 @@ new_keys = [
     "calculated_PDF_number",
     "modulated_structure",
     "only_cell_and_structure_type",
-    "temperature_factors_available"
+    "temperature_factors_available",
+    "ICSD_version"
 ]
 conflicting_keys = [
     'PDF_number',  # queryer ver. 2017 returns 'R-value' by a bug
@@ -79,6 +80,8 @@ class TestRandom(unittest.TestCase):
                 expected_dict['structural_prototype'],
                 crawled_dict['structural_prototype']
             ))
+
+        assert "Version" in crawled_dict['ICSD_version']
 
         for key in new_keys + conflicting_keys:
             del crawled_dict[key]

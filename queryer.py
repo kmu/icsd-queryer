@@ -5,8 +5,7 @@ import json
 import time
 from bs4 import BeautifulSoup
 import pandas as pd
-
-pd.options.display.max_colwidth = 1000
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -14,6 +13,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+
+
+pd.options.display.max_colwidth = 1000
 
 
 class QueryerError(Exception):
@@ -490,7 +492,19 @@ class Queryer(object):
                 sys.stdout.write('"{}" parser not implemented!\n'.format(tag))
                 print(e)
                 continue
+
+        parsed_data['ICSD_version'] = self._get_icsd_ver()
+
         return(parsed_data)
+
+    def _get_icsd_ver(self):
+        source = self.driver.page_source
+        search = re.search('<p>(Version[\s0-9.()A-z-]+)</p>', source)
+        if search:
+            return(search.group(1))
+
+        return("")
+
 
     def get_collection_code(self):
         """
