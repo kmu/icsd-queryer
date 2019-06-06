@@ -258,8 +258,12 @@ class Queryer(object):
         """
         Use By.NAME to locate the 'Run Query' button and click it.
         """
-        self._wait_until_dialogue_disappears()
-        self.driver.find_element_by_name('content_form:btnRunQuery').click()
+        element = WebDriverWait(self.driver, 20).until(
+            ec.element_to_be_clickable((
+                By.NAME, "content_form:btnRunQuery"
+        )))
+
+        element.click()
 
     def _check_list_view(self):
         """
