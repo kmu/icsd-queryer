@@ -18,7 +18,7 @@ class TestQueryer(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
-        time.sleep(5)
+        # time.sleep(5)
 
     def test_dummy_data(self):
         queryer = Queryer()

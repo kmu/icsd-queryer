@@ -224,8 +224,6 @@ class Queryer(object):
         while True:
             element = self.driver.find_element_by_id("dlgBlockUI")
             is_hidden = element.get_attribute("aria-hidden")
-            from icecream import ic
-            ic(is_hidden)
             time.sleep(0.1)
             if is_hidden == 'true':
                 time.sleep(0.1)
