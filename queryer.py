@@ -12,6 +12,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.by import By
 
 
 class QueryerError(Exception):
@@ -204,9 +206,29 @@ class Queryer(object):
             tag_dict[self.structure_source])
         radio_label = self.driver.find_element_by_xpath(xpath)
         radio_label.click()
-        # time.sleep(10)
-        self.wait_for_ajax()
+        # self.wait_for_ajax()
+
+        # wait = WebDriverWait(self.driver, 15)
+        # men_menu = wait.until(ec.visibility_of_element_located((By.ID, "dlgBlockUI")))
+
+        self._wait_until_dialogue_disappears()
+
+        # print(visibility)
+        # ec.visibility_of_element_located(By.ID, "dlgBlockUI")
         # self.driver.manage().timeouts().implicitlyWait()
+        # theory = self.driver.find_element_by_value("THEORETICAL_STRUCTURES")
+
+    def _wait_until_dialogue_disappears(self):
+        while True:
+            element = self.driver.find_element_by_id("dlgBlockUI")
+            is_hidden = element.get_attribute("aria-hidden")
+            from icecream import ic
+            ic(is_hidden)
+            time.sleep(0.1)
+            if is_hidden == 'true':
+                time.sleep(0.1)
+                return()
+
 
     def post_query_to_form(self):
         """
@@ -234,6 +256,7 @@ class Queryer(object):
         """
         Use By.NAME to locate the 'Run Query' button and click it.
         """
+        self._wait_until_dialogue_disappears()
         self.driver.find_element_by_name('content_form:btnRunQuery').click()
 
     def _check_list_view(self):
@@ -296,6 +319,7 @@ class Queryer(object):
             "//span[contains(.,'Show Detailed View')]")
         self.wait_for_ajax()
         time.sleep(3)
+        #
         self.driver.execute_script("arguments[0].click();", element)
         # time.sleep(10)
 
@@ -331,7 +355,8 @@ class Queryer(object):
         button, and click it.
         """
         # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        time.sleep(3)
+        # time.sleep(3)
+        self._wait_until_dialogue_disappears()
         self.wait_for_ajax()
         element = self.driver.find_element_by_link_text("Expand all")
         self.driver.execute_script("arguments[0].click();", element)
