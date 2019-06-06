@@ -358,11 +358,11 @@ class Queryer(object):
         Use By.CSS_SELECTOR to locate the 'Expand All' ('a#ExpandAll.no_print')
         button, and click it.
         """
-        # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        # time.sleep(3)
-        self._wait_until_dialogue_disappears()
-        self.wait_for_ajax()
-        element = self.driver.find_element_by_link_text("Expand all")
+        element = WebDriverWait(self.driver, 20).until(
+            ec.presence_of_element_located((
+                By.LINK_TEXT, "Expand all"
+        )))
+
         self.driver.execute_script("arguments[0].click();", element)
 
     def _get_number_of_entries_loaded(self):
