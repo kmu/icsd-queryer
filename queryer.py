@@ -229,7 +229,6 @@ class Queryer(object):
                 time.sleep(0.1)
                 return()
 
-
     def post_query_to_form(self):
         """
         Use By.ID to locate elements in the query (using IDs stored in
@@ -259,7 +258,7 @@ class Queryer(object):
         element = WebDriverWait(self.driver, 20).until(
             ec.element_to_be_clickable((
                 By.NAME, "content_form:btnRunQuery"
-        )))
+            )))
 
         element.click()
 
@@ -361,7 +360,7 @@ class Queryer(object):
         element = WebDriverWait(self.driver, 20).until(
             ec.presence_of_element_located((
                 By.LINK_TEXT, "Expand all"
-        )))
+            )))
 
         self.driver.execute_script("arguments[0].click();", element)
 
@@ -458,7 +457,8 @@ class Queryer(object):
         """
 
         self.wait_for_ajax()
-        element = self.driver.find_element_by_xpath("//button[@id='display_form:buttonNext']/span")
+        element = self.driver.find_element_by_xpath(
+            "//button[@id='display_form:buttonNext']/span")
         self.driver.execute_script("arguments[0].click();", element)
         # self.driver.find_element_by_class_name('button_vcr_next').click()
 
@@ -507,7 +507,6 @@ class Queryer(object):
             return(search.group(1))
 
         return("")
-
 
     def get_collection_code(self):
         """
@@ -561,7 +560,7 @@ class Queryer(object):
         pdf_number = pdf_number.strip()
 
         # if pdf_number == 'R-value':
-            # return("")
+        # return("")
         # tag = ICSD_PARSE_TAGS['PDF_number']
         # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
         # nodes = self.driver.find_elements_by_xpath(xpath)
@@ -667,7 +666,8 @@ class Queryer(object):
         # df = pd.read_html(table, index_col=3)
         # formula = df.loc['Struct. formula', 4]
         _df = self._get_chemistry_panel()
-        formula = _df[_df.Name == 'Struct. formula'].Value.to_string(index=False)
+        formula = _df[_df.Name == 'Struct. formula'].Value.to_string(
+            index=False)
         return(formula.strip())
 
     def get_AB_formula(self):
@@ -696,7 +696,8 @@ class Queryer(object):
         # table = self.get_html_table(idx=3)
         # df = pd.read_html(table, index_col=0)
         _df = self._get_published_crystal_structure_data_panel()
-        raw_text = _df[_df.Name == 'Cell parameter'].Value.to_string(index=False)
+        raw_text = _df[_df.Name ==
+                       'Cell parameter'].Value.to_string(index=False)
         # raw_text = df.loc['Cell parameter', 1]
         raw_text = raw_text.strip()
 
@@ -742,7 +743,7 @@ class Queryer(object):
         # Published Crystal Structure Data
         _df = self._get_published_crystal_structure_data_panel()
         raw_text = _df[_df.Name == 'Space group'].Value.to_string(index=False)
-        raw_text =  raw_text.replace(" (", "(")
+        raw_text = raw_text.replace(" (", "(")
         return(raw_text.strip())
 
     def _get_published_crystal_structure_data_panel(self):
@@ -777,7 +778,8 @@ class Queryer(object):
         """
         # element = self.driver.find_element_by_id('textfieldPub11')
         _df = self._get_published_crystal_structure_data_panel()
-        wyckoff = _df[_df.Name == 'Wyckoff sequence'].Value.to_string(index=False)
+        wyckoff = _df[_df.Name == 'Wyckoff sequence'].Value.to_string(
+            index=False)
         return(wyckoff.strip())
 
     def get_formula_units_per_cell(self):
@@ -805,9 +807,9 @@ class Queryer(object):
         """
         _df = self._get_published_crystal_structure_data_panel()
 
-        pearson = _df[_df.Name == 'Pearson symbol'].Value.to_string(index=False)
+        pearson = _df[_df.Name == 'Pearson symbol'].Value.to_string(
+            index=False)
         return(pearson.strip())
-
 
     def get_crystal_class(self):
         """
@@ -820,7 +822,8 @@ class Queryer(object):
         Return: (string) Crystal class if available, empty string otherwise
         """
         _df = self._get_published_crystal_structure_data_panel()
-        crystalclass = _df[_df.Name == 'Crystal class'].Value.to_string(index=False)
+        crystalclass = _df[_df.Name ==
+                           'Crystal class'].Value.to_string(index=False)
 
         if crystalclass == "Series([], )":
             return("")
@@ -932,8 +935,8 @@ class Queryer(object):
         warnings = df[df.Name == key].Value.tolist()
         return(warnings)
 
-
     # panel: "Warnings & Comments"
+
     def get_warnings(self):
         """
         Use By.ID to locate 'Warnings & Comments' ('ir_a_8_81a3e') block, then
@@ -942,7 +945,6 @@ class Queryer(object):
 
         Return: (list) A list of warnings if any, empty list otherwise
         """
-
 
         # warnings = []
         # block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
@@ -1042,7 +1044,8 @@ class Queryer(object):
         # df = pd.read_html(table, index_col=0)[0]
         # rad_type = df.loc['Radiation type', 1]
         _df = self._get_experimental_information_panel()
-        rad_type = _df[_df.Name == 'Radiation type'].Value.to_string(index=False)
+        rad_type = _df[_df.Name ==
+                       'Radiation type'].Value.to_string(index=False)
         return(rad_type.strip())
 
     # subpanel: "Radiation Type"
@@ -1101,7 +1104,8 @@ class Queryer(object):
         > Experimental information > Sample type
         """
         _df = self._get_experimental_information_panel()
-        sample_type = _df[_df.Name == 'Sample type'].Value.to_string(index=False)
+        sample_type = _df[_df.Name ==
+                          'Sample type'].Value.to_string(index=False)
         return(sample_type.strip())
 
     # subpanel: "Sample Type"
@@ -1183,7 +1187,7 @@ class Queryer(object):
         """
         Is the 'Magnetic Structure Available' checkbox enabled?
         """
-        return(False) # Where can I find this?
+        return(False)  # Where can I find this?
         # return(self._is_checkbox_enabled('magnetic_structure_available'))
 
     def is_anharmonic_temperature_factors_given(self):
@@ -1249,7 +1253,7 @@ class Queryer(object):
         remarks = self._get_remarks()
         for remark in remarks:
             if "rototype" in remark:
-            #  Could not figure out where should I look
+                #  Could not figure out where should I look
                 return(True)
 
         return(False)
@@ -1315,7 +1319,8 @@ class Queryer(object):
                            "ICSD_Coll_Code_18975.cif"
         """
         self.wait_for_ajax()
-        element = self.driver.find_element_by_xpath("//button[@id='display_form:btnEntryDownloadCif']/span[2]")
+        element = self.driver.find_element_by_xpath(
+            "//button[@id='display_form:btnEntryDownloadCif']/span[2]")
         self.driver.execute_script("arguments[0].click();", element)
         # filename_element = self.driver.find_element_by_id(
         #     'fileNameForExportToCif')
