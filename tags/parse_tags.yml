@@ -57,6 +57,6 @@
         mineral: "Mineral"
         is_structure_prototype: "Structure Prototype"
 #KM's new keys:
-        theoretical_calculation: "Theoretical structures"
+        # theoretical_calculation: "Theoretical structures"
         defect: "Defect"
         doi: "DOI"

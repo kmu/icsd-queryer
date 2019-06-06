@@ -496,6 +496,7 @@ class Queryer(object):
                 continue
 
         parsed_data['ICSD_version'] = self._get_icsd_ver()
+        parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
 
         return(parsed_data)
 
@@ -654,18 +655,6 @@ class Queryer(object):
         # formula = df.loc['Sum. formula', 1]
         formula = _df[_df.Name == 'Sum. formula'].Value.to_string(index=False)
         return(formula.strip())
-
-    def is_theoretical_calculation(self):
-        headers = self.soup.findAll("div", {"class": "ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"})
-        headers = [h.text for h in headers]
-
-        if "Experimental information" in headers:
-            return(False)
-
-        elif "Theoretical information" in headers:
-            return(True)
-
-        return(None)
 
     def get_structural_formula(self):
         """
