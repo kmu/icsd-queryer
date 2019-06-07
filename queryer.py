@@ -255,6 +255,7 @@ class Queryer(object):
         """
         Use By.NAME to locate the 'Run Query' button and click it.
         """
+        time.sleep(3)
         self._wait_until_dialogue_disappears()
         self.wait_for_ajax()
         element = WebDriverWait(self.driver, 20).until(
@@ -332,7 +333,8 @@ class Queryer(object):
 
         self.wait_for_ajax()
         self._check_detailed_view()
-        self.wait_for_ajax()
+        self._wait_until_dialogue_disappears()
+        time.sleep(3)
         self._expand_all()
 
         # self.wait_for_ajax()
@@ -489,6 +491,8 @@ class Queryer(object):
         Return: (dict) `parsed_data` with [tag]:[parsed value]
         """
         self._wait_until_dialogue_disappears()
+        self.wait_for_ajax()
+        time.sleep(3)
         parsed_data = {}
         parsed_data['collection_code'] = self.get_collection_code()
         for tag in ICSD_PARSE_TAGS.keys():
