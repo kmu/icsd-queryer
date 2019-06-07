@@ -224,8 +224,6 @@ class Queryer(object):
         while True:
             element = self.driver.find_element_by_id("dlgBlockUI")
             is_hidden = element.get_attribute("aria-hidden")
-            from icecream import ic
-            ic(is_hidden)
             time.sleep(0.1)
             if is_hidden == 'true':
                 time.sleep(0.1)
@@ -261,7 +259,6 @@ class Queryer(object):
             ec.element_to_be_clickable((
                 By.NAME, "content_form:btnRunQuery"
             )))
-
         element.click()
 
     def _check_list_view(self):
@@ -371,7 +368,7 @@ class Queryer(object):
         Use By.CSS_SELECTOR to locate the 'Expand All' ('a#ExpandAll.no_print')
         button, and click it.
         """
-        element = WebDriverWait(self.driver, 20).until(
+        element = WebDriverWait(self.driver, 60).until(
             ec.presence_of_element_located((
                 By.LINK_TEXT, "Expand all"
             )))
@@ -542,7 +539,10 @@ class Queryer(object):
                     break
                 except Exception as e:
                     self.quit()
-                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + e
+
+                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + str(e)
+                    print("title text:")
+                    print(title.text)
                     raise QueryerError(error_message)
         return(collection_code)
 
@@ -1368,6 +1368,11 @@ class Queryer(object):
         """
         Post the query to form, parse data for all the entries. (wrapper)
         """
+        element = WebDriverWait(self.driver, 20).until(
+            ec.element_to_be_clickable((
+                By.NAME, "content_form:btnRunQuery"
+            )))
+        # Wait until button appears
         self.select_structure_source()
         self.post_query_to_form()
         self._click_select_all()
