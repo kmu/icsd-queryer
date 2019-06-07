@@ -1120,6 +1120,21 @@ class Queryer(object):
         return('Synchrotron' == self._get_radiation_type())
         # return(self._is_checkbox_enabled('synchrotron'))
 
+    def _get_bibliography_panel(self):
+        table = self.get_html_table(idx=16)
+        df = pd.read_html(table)[0]
+        df = self._parse_two_column_table(df)
+        return(df)
+
+    def get_abstract(self):
+        df = self._get_bibliography_panel()
+        abstract = _df[_df.Name == 'Abstract'].Value
+
+        if len(abstract) == 0:
+            return("")
+
+        return(abstract.to_string(index=False))
+
     def _get_experimental_information_panel(self):
         table = self.get_html_table(idx=17)
         df = pd.read_html(table)[0]
