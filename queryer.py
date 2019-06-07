@@ -205,14 +205,16 @@ class Queryer(object):
 
         if self.structure_source == 'T' or self.structure_source == 'A':
             number_tag = tag_dict.get(self.structure_source)
-            xpath = "//table/tbody/tr/td/label[text()[contains(., 'Theoretical structures')]]"
+            xpath = "//table/tbody/tr/td/label["\
+                "text()[contains(., 'Theoretical structures')]]"
             radio_label = self.driver.find_element_by_xpath(xpath)
             radio_label.click()
             self._wait_until_dialogue_disappears()
 
         if self.structure_source == 'A':
             number_tag = tag_dict.get(self.structure_source)
-            xpath = "//table/tbody/tr/td/label[text()[contains(., 'Experim. metal-organic str.')]]"
+            xpath = "//table/tbody/tr/td/label["\
+                "text()[contains(., 'Experim. metal-organic str.')]]"
             radio_label = self.driver.find_element_by_xpath(xpath)
             radio_label.click()
 
@@ -321,15 +323,13 @@ class Queryer(object):
         # 'display_form:listViewTable:uiSelectAllRows')
         self._wait_until_dialogue_disappears()
 
-
         element = WebDriverWait(self.driver, 60).until(
             ec.presence_of_element_located((
                 By.XPATH, "//span[contains(.,'Show Detailed View')]"
             )))
 
-
         # element = self.driver.find_element_by_xpath(
-            # "//span[contains(.,'Show Detailed View')]")
+        # "//span[contains(.,'Show Detailed View')]")
         self._wait_until_dialogue_disappears()
         # self.wait_for_ajax()
         # time.sleep()
@@ -348,7 +348,9 @@ class Queryer(object):
 
         while True:
             time.sleep(0.1)
-            folded_elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all"]')
+            folded_elements = self.driver.find_elements_by_xpath(
+                '//*[@class="ui-accordion-header '
+                'ui-helper-reset ui-state-default ui-corner-all"]')
 
             if len(folded_elements) == 0:
                 time.sleep(0.1)
@@ -363,8 +365,8 @@ class Queryer(object):
             titles = self.driver.find_elements_by_id('display_main')
         except Exception as e:
             self.quit()
-            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(
-                e)
+            error_message = 'Failed to load "Detailed View" of results.'\
+                ' Original error:{}'.format(e)
             raise QueryerError(error_message)
 
         else:
@@ -559,7 +561,8 @@ class Queryer(object):
                 except Exception as e:
                     self.quit()
 
-                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + str(e)
+                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
+                        str(e)
                     print("title text:")
                     print(title.text)
                     raise QueryerError(error_message)
