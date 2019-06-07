@@ -1096,7 +1096,14 @@ class Queryer(object):
         """
         Is the 'Electrons' checkbox enabled?
         """
-        return('Electron' == self._get_radiation_type())
+        if 'Electron' == self._get_radiation_type():
+            return(True)
+
+        if "Electron microscopy (powder)" in self._get_remarks():
+            return(True)
+
+        return(False)
+
         # return(self._is_checkbox_enabled('electron_diffraction'))
 
     def is_neutron_diffraction(self):
