@@ -161,6 +161,21 @@ class TestQueryer(unittest.TestCase):
 
         self.assertDictEqual(expected_dict, crawled_dict)
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
+    def test_all_structures(self):
+        code = 44278
+        query = {
+            "icsd_collection_code": code,
+        }
+
+        queryer = Queryer(query=query, structure_source="all")
+        queryer.perform_icsd_query()
+        self.assertEqual(1, queryer.hits)
+
+        with open("{}/meta_data.json".format(code)) as f:
+            crawled_dict = json.load(f)
+
+        assert crawled_dict['theoretical_calculation'] == True
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_theory(self):

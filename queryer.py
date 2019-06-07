@@ -203,22 +203,20 @@ class Queryer(object):
         tag_dict = {'T': 'Theoretical structures',
                     'A': 'All Structures'}
 
-        number_tag = tag_dict.get(self.structure_source)
-        xpath = "//table/tbody/tr/td/label[text()[contains(., '{}')]]".format(
-            tag_dict[self.structure_source])
-        radio_label = self.driver.find_element_by_xpath(xpath)
-        radio_label.click()
-        # self.wait_for_ajax()
+        if self.structure_source == 'T' or self.structure_source == 'A':
+            number_tag = tag_dict.get(self.structure_source)
+            xpath = "//table/tbody/tr/td/label[text()[contains(., 'Theoretical structures')]]"
+            radio_label = self.driver.find_element_by_xpath(xpath)
+            radio_label.click()
+            self._wait_until_dialogue_disappears()
 
-        # wait = WebDriverWait(self.driver, 15)
-        # men_menu = wait.until(ec.visibility_of_element_located((By.ID, "dlgBlockUI")))
+        if self.structure_source == 'A':
+            number_tag = tag_dict.get(self.structure_source)
+            xpath = "//table/tbody/tr/td/label[text()[contains(., 'Experim. metal-organic str.')]]"
+            radio_label = self.driver.find_element_by_xpath(xpath)
+            radio_label.click()
 
         self._wait_until_dialogue_disappears()
-
-        # print(visibility)
-        # ec.visibility_of_element_located(By.ID, "dlgBlockUI")
-        # self.driver.manage().timeouts().implicitlyWait()
-        # theory = self.driver.find_element_by_value("THEORETICAL_STRUCTURES")
 
     def _wait_until_dialogue_disappears(self):
         while True:
