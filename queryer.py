@@ -317,13 +317,21 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        time.sleep(1)
+        time.sleep(3)
         self.wait_for_ajax()
         # element = self.driver.find_element_by_id(
         # 'display_form:listViewTable:uiSelectAllRows')
         self._wait_until_dialogue_disappears()
-        element = self.driver.find_element_by_xpath(
-            "//span[contains(.,'Show Detailed View')]")
+
+
+        element = WebDriverWait(self.driver, 60).until(
+            ec.presence_of_element_located((
+                By.XPATH, "//span[contains(.,'Show Detailed View')]"
+            )))
+
+
+        # element = self.driver.find_element_by_xpath(
+            # "//span[contains(.,'Show Detailed View')]")
         self._wait_until_dialogue_disappears()
         # self.wait_for_ajax()
         # time.sleep()
@@ -1127,7 +1135,7 @@ class Queryer(object):
         return(df)
 
     def get_abstract(self):
-        df = self._get_bibliography_panel()
+        _df = self._get_bibliography_panel()
         abstract = _df[_df.Name == 'Abstract'].Value
 
         if len(abstract) == 0:

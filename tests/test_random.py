@@ -22,7 +22,8 @@ new_keys = [
     "modulated_structure",
     "only_cell_and_structure_type",
     "temperature_factors_available",
-    "ICSD_version"
+    "ICSD_version",
+    'abstract'
 ]
 conflicting_keys = [
     'PDF_number',  # queryer ver. 2017 returns 'R-value' by a bug
