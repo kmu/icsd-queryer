@@ -33,7 +33,7 @@ conflicting_keys = [
     'reference_3',  # while ICSD ver. 2019 does not have.
     "comments",
     # Order of multiple comments
-    # can be different. Tested below.
+    # can be different. Tested elsewhere.
     # Additional comments can be added depending on versions
     "structural_prototype",
     # Generally consistent, but can be divided
