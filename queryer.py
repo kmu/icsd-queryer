@@ -224,6 +224,8 @@ class Queryer(object):
         while True:
             element = self.driver.find_element_by_id("dlgBlockUI")
             is_hidden = element.get_attribute("aria-hidden")
+            from icecream import ic
+            ic(is_hidden)
             time.sleep(0.1)
             if is_hidden == 'true':
                 time.sleep(0.1)
@@ -336,45 +338,13 @@ class Queryer(object):
         # self.wait_for_ajax()
         # self._wait_until_dialogue_disappears()
 
-        # ***
-
-        from icecream import ic
-
         while True:
             time.sleep(0.1)
             folded_elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all"]')
 
-            expanded_elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"]')
-
-            ic("------")
-            ic(len(folded_elements))
-            ic(len(expanded_elements))
-
             if len(folded_elements) == 0:
                 time.sleep(0.1)
                 return()
-
-        while True:
-            time.sleep(0.1)
-            is_expanded = True
-            # elements = self.driver.find_elements_by_class_name("ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top")
-            elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"]')
-            ic(len(elements))
-            if len(elements) > 8:
-                for e in elements:
-                    if e.get_attribute("aria-expanded") == 'false':
-                        ic(False)
-                        is_expanded = False
-                    else:
-                        ic(True)
-
-
-                    ic(is_expanded)
-                    time.sleep(0.1)
-
-                if is_expanded:
-                    time.sleep(0.1)
-                    return()
 
     def _check_detailed_view(self):
         """
@@ -518,6 +488,7 @@ class Queryer(object):
 
         Return: (dict) `parsed_data` with [tag]:[parsed value]
         """
+        self._wait_until_dialogue_disappears()
         parsed_data = {}
         parsed_data['collection_code'] = self.get_collection_code()
         for tag in ICSD_PARSE_TAGS.keys():
