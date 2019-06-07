@@ -315,13 +315,15 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        self.wait_for_ajax()
+        # self.wait_for_ajax()
         # element = self.driver.find_element_by_id(
         # 'display_form:listViewTable:uiSelectAllRows')
+        self._wait_until_dialogue_disappears()
         element = self.driver.find_element_by_xpath(
             "//span[contains(.,'Show Detailed View')]")
-        self.wait_for_ajax()
-        time.sleep(3)
+        self._wait_until_dialogue_disappears()
+        # self.wait_for_ajax()
+        # time.sleep()
         #
         self.driver.execute_script("arguments[0].click();", element)
         # time.sleep(10)
@@ -330,7 +332,49 @@ class Queryer(object):
         self._check_detailed_view()
         self.wait_for_ajax()
         self._expand_all()
-        self.wait_for_ajax()
+
+        # self.wait_for_ajax()
+        # self._wait_until_dialogue_disappears()
+
+        # ***
+
+        from icecream import ic
+
+        while True:
+            time.sleep(0.1)
+            folded_elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-corner-all"]')
+
+            expanded_elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"]')
+
+            ic("------")
+            ic(len(folded_elements))
+            ic(len(expanded_elements))
+
+            if len(folded_elements) == 0:
+                time.sleep(0.1)
+                return()
+
+        while True:
+            time.sleep(0.1)
+            is_expanded = True
+            # elements = self.driver.find_elements_by_class_name("ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top")
+            elements = self.driver.find_elements_by_xpath('//*[@class="ui-accordion-header ui-helper-reset ui-state-default ui-state-active ui-corner-top"]')
+            ic(len(elements))
+            if len(elements) > 8:
+                for e in elements:
+                    if e.get_attribute("aria-expanded") == 'false':
+                        ic(False)
+                        is_expanded = False
+                    else:
+                        ic(True)
+
+
+                    ic(is_expanded)
+                    time.sleep(0.1)
+
+                if is_expanded:
+                    time.sleep(0.1)
+                    return()
 
     def _check_detailed_view(self):
         """
@@ -515,7 +559,9 @@ class Queryer(object):
 
         Return: (integer) ICSD Collection Code
         """
-        time.sleep(10)
+        # time.sleep(10)
+        self.wait_for_ajax()
+        self._wait_until_dialogue_disappears()
         titles = self.driver.find_elements_by_id('display_main')
 
         for title in titles:
