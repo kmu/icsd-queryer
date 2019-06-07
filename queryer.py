@@ -255,6 +255,8 @@ class Queryer(object):
         """
         Use By.NAME to locate the 'Run Query' button and click it.
         """
+        self._wait_until_dialogue_disappears()
+        self.wait_for_ajax()
         element = WebDriverWait(self.driver, 20).until(
             ec.element_to_be_clickable((
                 By.NAME, "content_form:btnRunQuery"
@@ -314,7 +316,8 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        # self.wait_for_ajax()
+        time.sleep(1)
+        self.wait_for_ajax()
         # element = self.driver.find_element_by_id(
         # 'display_form:listViewTable:uiSelectAllRows')
         self._wait_until_dialogue_disappears()
@@ -530,7 +533,13 @@ class Queryer(object):
         # time.sleep(10)
         self.wait_for_ajax()
         self._wait_until_dialogue_disappears()
-        titles = self.driver.find_elements_by_id('display_main')
+
+        titles = WebDriverWait(self.driver, 20).until(
+            ec.presence_of_all_elements_located((
+                By.ID, "display_main"
+            )))
+
+        # titles = self.driver.find_elements_by_id('display_main')
 
         for title in titles:
             if 'Summary' in title.text:
