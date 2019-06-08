@@ -56,3 +56,8 @@
         disordered: "Disordered Structure"
         mineral: "Mineral"
         is_structure_prototype: "Structure Prototype"
+#KM's new keys:
+        # theoretical_calculation: "Theoretical structures"
+        defect: "Defect"
+        doi: "DOI"
+        abstract: "Abstract"

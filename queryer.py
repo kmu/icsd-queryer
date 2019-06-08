@@ -5,13 +5,17 @@ import json
 import time
 from bs4 import BeautifulSoup
 import pandas as pd
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.by import By
 
-from icecream import ic
+
+pd.options.display.max_colwidth = 1000
 
 
 class QueryerError(Exception):
@@ -28,7 +32,7 @@ class Queryer(object):
                  url=None,
                  query=None,
                  save_screenshot=None,
-                 structure_source=None):
+                 structure_source='E'):
         """
         Initialize the webdriver and load the URL.
         (Also, check if the "Basic Search" page has loaded successfully.)
@@ -57,7 +61,6 @@ class Queryer(object):
                 (Default: False)
 
             structure_source:
-                **NOT IMPLEMENTED**
                 String specifying whether the search should be limited to only
                 experimental structures, theoretical structures, or both.
                 Options: "E"/"T"/"A" for experimental/theoretical/all structures
@@ -161,7 +164,10 @@ class Queryer(object):
         # start: exited normally"
         ##_options.add_argument('--no-startup-window ')
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
-        prefs = {'download.default_directory': self.download_dir}
+        prefs = {
+            'download.default_directory': self.download_dir,
+            'profile.default_content_setting_values.automatic_downloads': 1
+        }
         _options.add_experimental_option("prefs", prefs)
         return(webdriver.Chrome(chrome_options=_options))
 
@@ -190,14 +196,38 @@ class Queryer(object):
         sources.
         """
         if self.structure_source == 'E':
+            # Experim. inorganic structures
             return
-        tag_dict = {'T': 'Theoretical Structures only',
+
+        self.wait_for_ajax()
+        tag_dict = {'T': 'Theoretical structures',
                     'A': 'All Structures'}
-        number_tag = tag_dict.get(self.structure_source)
-        xpath = "//table/tbody/tr/td/label[text()[contains(., '{}')]]".format(
-            tag_dict[self.structure_source])
-        radio_label = self.driver.find_element_by_xpath(xpath)
-        radio_label.click()
+
+        if self.structure_source == 'T' or self.structure_source == 'A':
+            number_tag = tag_dict.get(self.structure_source)
+            xpath = "//table/tbody/tr/td/label["\
+                "text()[contains(., 'Theoretical structures')]]"
+            radio_label = self.driver.find_element_by_xpath(xpath)
+            radio_label.click()
+            self._wait_until_dialogue_disappears()
+
+        if self.structure_source == 'A':
+            number_tag = tag_dict.get(self.structure_source)
+            xpath = "//table/tbody/tr/td/label["\
+                "text()[contains(., 'Experim. metal-organic str.')]]"
+            radio_label = self.driver.find_element_by_xpath(xpath)
+            radio_label.click()
+
+        self._wait_until_dialogue_disappears()
+
+    def _wait_until_dialogue_disappears(self):
+        while True:
+            element = self.driver.find_element_by_id("dlgBlockUI")
+            is_hidden = element.get_attribute("aria-hidden")
+            time.sleep(0.1)
+            if is_hidden == 'true':
+                time.sleep(0.1)
+                return()
 
     def post_query_to_form(self):
         """
@@ -225,7 +255,14 @@ class Queryer(object):
         """
         Use By.NAME to locate the 'Run Query' button and click it.
         """
-        self.driver.find_element_by_name('content_form:btnRunQuery').click()
+        time.sleep(3)
+        self._wait_until_dialogue_disappears()
+        self.wait_for_ajax()
+        element = WebDriverWait(self.driver, 20).until(
+            ec.element_to_be_clickable((
+                By.NAME, "content_form:btnRunQuery"
+            )))
+        element.click()
 
     def _check_list_view(self):
         """
@@ -261,9 +298,6 @@ class Queryer(object):
             'display_form:listViewTable:uiSelectAllRows_input')
         self.wait_for_ajax()
         self.driver.execute_script("arguments[0].click();", element)
-        # element = self.driver.find_element_by_id(
-        #     'display_form:listViewTable:uiSelectAllRows')
-        # self.driver.execute_script("arguments[0].click();", element)
 
     def wait_for_ajax(self, second=15):
         wait = WebDriverWait(self.driver, second)
@@ -280,21 +314,31 @@ class Queryer(object):
         Use By.ID to locate the 'Show Detailed View' ('LVDetailed') button, and
         click it.
         """
-        self.wait_for_ajax()
-        # element = self.driver.find_element_by_id(
-        # 'display_form:listViewTable:uiSelectAllRows')
-        element = self.driver.find_element_by_xpath(
-            "//span[contains(.,'Show Detailed View')]")
-        self.wait_for_ajax()
         time.sleep(3)
-        self.driver.execute_script("arguments[0].click();", element)
-        # time.sleep(10)
+        self.wait_for_ajax()
+        self._wait_until_dialogue_disappears()
 
+        element = WebDriverWait(self.driver, 60).until(
+            ec.presence_of_element_located((
+                By.XPATH, "//span[contains(.,'Show Detailed View')]"
+            )))
+        self._wait_until_dialogue_disappears()
+        self.driver.execute_script("arguments[0].click();", element)
         self.wait_for_ajax()
         self._check_detailed_view()
-        self.wait_for_ajax()
+        self._wait_until_dialogue_disappears()
+        time.sleep(3)
         self._expand_all()
-        self.wait_for_ajax()
+
+        while True:
+            time.sleep(0.1)
+            folded_elements = self.driver.find_elements_by_xpath(
+                '//*[@class="ui-accordion-header '
+                'ui-helper-reset ui-state-default ui-corner-all"]')
+
+            if len(folded_elements) == 0:
+                time.sleep(0.1)
+                return()
 
     def _check_detailed_view(self):
         """
@@ -305,8 +349,8 @@ class Queryer(object):
             titles = self.driver.find_elements_by_id('display_main')
         except Exception as e:
             self.quit()
-            error_message = 'Failed to load "Detailed View" of results. Original error:{}'.format(
-                e)
+            error_message = 'Failed to load "Detailed View" of results.'\
+                ' Original error:{}'.format(e)
             raise QueryerError(error_message)
 
         else:
@@ -321,10 +365,11 @@ class Queryer(object):
         Use By.CSS_SELECTOR to locate the 'Expand All' ('a#ExpandAll.no_print')
         button, and click it.
         """
-        # self.driver.find_element_by_id('display_form:listViewTable:uiSelectAllRows').click()
-        time.sleep(3)
-        self.wait_for_ajax()
-        element = self.driver.find_element_by_link_text("Expand all")
+        element = WebDriverWait(self.driver, 60).until(
+            ec.presence_of_element_located((
+                By.LINK_TEXT, "Expand all"
+            )))
+
         self.driver.execute_script("arguments[0].click();", element)
 
     def _get_number_of_entries_loaded(self):
@@ -390,6 +435,7 @@ class Queryer(object):
             CIF_source_loc = os.path.join(self.download_dir, CIF_name)
             while True:
                 if os.path.exists(CIF_source_loc):
+                    time.sleep(0.1)
                     break
                 else:
                     time.sleep(0.1)
@@ -417,11 +463,10 @@ class Queryer(object):
         Use By.CLASS_NAME to locate the 'Next' button ('button_vcr_next'), and
         click it.
         """
-
         self.wait_for_ajax()
-        element = self.driver.find_element_by_xpath("//button[@id='display_form:buttonNext']/span")
+        element = self.driver.find_element_by_xpath(
+            "//button[@id='display_form:buttonNext']/span")
         self.driver.execute_script("arguments[0].click();", element)
-        # self.driver.find_element_by_class_name('button_vcr_next').click()
 
     def parse_entry(self):
         """
@@ -435,6 +480,9 @@ class Queryer(object):
 
         Return: (dict) `parsed_data` with [tag]:[parsed value]
         """
+        self._wait_until_dialogue_disappears()
+        self.wait_for_ajax()
+        time.sleep(3)
         parsed_data = {}
         parsed_data['collection_code'] = self.get_collection_code()
         for tag in ICSD_PARSE_TAGS.keys():
@@ -455,7 +503,19 @@ class Queryer(object):
                 sys.stdout.write('"{}" parser not implemented!\n'.format(tag))
                 print(e)
                 continue
+
+        parsed_data['ICSD_version'] = self._get_icsd_ver()
+        parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
+
         return(parsed_data)
+
+    def _get_icsd_ver(self):
+        source = self.driver.page_source
+        search = re.search('<p>(Version[\s0-9.()A-z-]+)</p>', source)
+        if search:
+            return(search.group(1))
+
+        return("")
 
     def get_collection_code(self):
         """
@@ -464,8 +524,13 @@ class Queryer(object):
 
         Return: (integer) ICSD Collection Code
         """
-        time.sleep(10)
-        titles = self.driver.find_elements_by_id('display_main')
+        self.wait_for_ajax()
+        self._wait_until_dialogue_disappears()
+
+        titles = WebDriverWait(self.driver, 20).until(
+            ec.presence_of_all_elements_located((
+                By.ID, "display_main"
+            )))
 
         for title in titles:
             if 'Summary' in title.text:
@@ -474,18 +539,20 @@ class Queryer(object):
                     break
                 except Exception as e:
                     self.quit()
-                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + e
+
+                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
+                        str(e)
+                    print("title text:")
+                    print(title.text)
                     raise QueryerError(error_message)
         return(collection_code)
 
     def get_html_table(self, idx):
-
         if not self.page_obatained:
             self.wait_for_ajax()
             self.soup = BeautifulSoup(self.driver.page_source, 'lxml')
             self.page_obatained = True
 
-        # ic(self.soup)
         table = self.soup.find_all('table')[idx]
 
         return(str(table))
@@ -499,24 +566,14 @@ class Queryer(object):
 
         Return: (string) PDF-number if available, empty string otherwise
         """
+        _df = self._get_experimental_information_panel()
+        pdf_number = _df[_df.Name == 'PDF calc.'].Value
+        if len(pdf_number) == 0:
+            return("")
 
-
-        _df = self._get_experimental_information_table()
-        pdf_number = _df[_df.Name == 'PDF calc.'].Value.to_string(index=False)
-        ic(pdf_number)
-
-        # tag = ICSD_PARSE_TAGS['PDF_number']
-        # xpath = "//td[text()[contains(., '{}')]]/../td/div".format(tag)
-        # nodes = self.driver.find_elements_by_xpath(xpath)
-        # # if PDF_number field is empty, return("" instead of )"R-value"
-
-        # from icecream import ic
-        # for node in nodes:
-        #     ic(node.text)
-
-        # if nodes[0].text != 'R-value':
-        #     pdf_number = nodes[0].text.split('\n')[0]
-        return(pdf_number.strip())
+        pdf_number = pdf_number.to_string(index=False)
+        pdf_number = pdf_number.strip()
+        return(pdf_number)
 
     def get_authors(self):
         """
@@ -525,12 +582,9 @@ class Queryer(object):
 
         Return: (string) Authors if available, empty string otherwise
         """
-        authors = ''
-        tag = ICSD_PARSE_TAGS['authors']
-        xpath = "//td[text()[contains(., '{}')]]/../td".format(tag)
-        nodes = self.driver.find_elements_by_xpath(xpath)
-        authors = nodes[1].text.strip().replace('\n', ' ')
-        return(authors)
+        _df = self._get_summary_panel()
+        author = _df[_df.Name == 'Author'].Value.to_string(index=False)
+        return(author.strip().replace('\n', ' '))
 
     def get_publication_title(self):
         """
@@ -539,13 +593,18 @@ class Queryer(object):
 
         Return: (string) Publication title if available, empty string otherwise
         """
-        table = self.get_html_table(idx=0)
-        df = pd.read_html(table, index_col=3)
-        title = df.loc['Title', 4]
+        _df = self._get_summary_panel()
+        title = _df[_df.Name == 'Title'].Value.to_string(index=False)
         return(title.strip().replace('\n', ' '))
 
-        # element = self.driver.find_element_by_id('textfield13')
-        # return(element.text.strip().replace('\n', ' '))
+    def get_doi(self):
+        _df = self._get_summary_panel()
+        doi = _df[_df.Name == 'DOI'].Value
+        if len(doi) == 0:
+            return("")
+
+        doi = doi.to_string(index=False)
+        return(doi.strip().replace('\n', ' '))
 
     def get_reference(self):
         """
@@ -555,27 +614,30 @@ class Queryer(object):
         Return: (string) Bibliographic reference if available, empty string
         otherwise
         """
-
-        # element = self.driver.find_element_by_id('textfield12')
-        table = self.get_html_table(idx=0)
-        df = pd.read_html(table, index_col=0)
-        reference = df.loc['Reference', 4]
-
+        _df = self._get_summary_panel()
+        reference = _df[_df.Name == 'Reference'].Value.to_string(index=False)
         return(reference.strip().replace('\n', ' '))
 
-    # panel: "Chemistry"
-    def _get_chemistry_table(self):
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table)
-        # df1 = df.loc[:, 0:1]
-        # df2 = df.loc[:, 3:5]
-
-        # df1.columns = ['Name', "Value"]
-        # df2.columns = ['Name', "Value"]
-
-        # df = pd.concat([df1, df2], axis=0)
+    # panel: "Summary"
+    def _get_summary_panel(self):
+        table = self.get_html_table(idx=0)
+        df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
+
+    # panel: "Chemistry"
+    def _get_chemistry_panel(self):
+        table = self.get_html_table(idx=2)
+        df = pd.read_html(table)[0]
+        df = self._parse_two_column_table(df)
+        return(df)
+
+    def get_defect(self):
+        """
+        All test data has defect: false
+        """
+
+        return(False)
 
     def get_chemical_formula(self):
         """
@@ -584,10 +646,8 @@ class Queryer(object):
 
         Return: (string) Chemical formula if available, empty string otherwise
         """
-        # element = self.driver.find_element_by_id('textfieldChem1')
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table, index_col=0)
-        formula = df.loc['Sum. formula', 1]
+        _df = self._get_chemistry_panel()
+        formula = _df[_df.Name == 'Sum. formula'].Value.to_string(index=False)
         return(formula.strip())
 
     def get_structural_formula(self):
@@ -597,9 +657,9 @@ class Queryer(object):
 
         Return: (string) Structural formula if available, empty string otherwise
         """
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table, index_col=3)
-        formula = df.loc['Struct. formula', 4]
+        _df = self._get_chemistry_panel()
+        formula = _df[_df.Name == 'Struct. formula'].Value.to_string(
+            index=False)
         return(formula.strip())
 
     def get_AB_formula(self):
@@ -609,9 +669,8 @@ class Queryer(object):
 
         Return: (string) AB formula if available, empty string otherwise
         """
-        table = self.get_html_table(idx=2)
-        df = pd.read_html(table, index_col=3)
-        formula = df.loc['AB formula', 4]
+        _df = self._get_chemistry_panel()
+        formula = _df[_df.Name == 'AB formula'].Value.to_string(index=False)
         return(formula.strip())
 
     # panel: "Published Crystal Structure Data"
@@ -625,11 +684,11 @@ class Queryer(object):
                 'beta', 'gamma', and values in float
                 (Lattice vectors are in Angstrom, angles in degrees.)
         """
-        # element = self.driver.find_element_by_id('textfieldPub1')
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        raw_text = df.loc['Cell parameter', 1]
+        _df = self._get_published_crystal_structure_data_panel()
+        raw_text = _df[_df.Name ==
+                       'Cell parameter'].Value.to_string(index=False)
         raw_text = raw_text.strip()
+
         a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
                                        in raw_text.split()]
         cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
@@ -652,10 +711,13 @@ class Queryer(object):
 
         Return: (float) Volume in cubic Angstrom
         """
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        volume = df.loc['Cell volume', 1]
-        return(volume.strip())
+        _df = self._get_published_crystal_structure_data_panel()
+        raw_text = _df[_df.Name == 'Cell volume'].Value.to_string(index=False)
+        raw_text.strip()
+        raw_text = raw_text.split()[0]
+        volume = float(raw_text)
+
+        return(volume)
 
     def get_space_group(self):
         """
@@ -666,13 +728,16 @@ class Queryer(object):
         """
 
         # Published Crystal Structure Data
+        _df = self._get_published_crystal_structure_data_panel()
+        raw_text = _df[_df.Name == 'Space group'].Value.to_string(index=False)
+        raw_text = raw_text.replace(" (", "(")
+        return(raw_text.strip())
+
+    def _get_published_crystal_structure_data_panel(self):
         table = self.get_html_table(idx=3)
-        df = pd.read_html(table)
-        # df = pd.read_html(table, index_col=3)
-        # print(df)
-        # volume = df.loc['Space group', 4]
-        space_group = df.iloc[0, 4]
-        return(space_group.strip())
+        df = pd.read_html(table)[0]
+        df = self._parse_two_column_table(df)
+        return(df)
 
     def get_crystal_system(self):
         """
@@ -682,9 +747,13 @@ class Queryer(object):
         Return: (string) Crystal system if available, empty string otherwise
         """
         # Published Crystal Structure Data
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        system = df.loc['Crystal system', 1]
+
+        _df = self._get_published_crystal_structure_data_panel()
+        system = _df[_df.Name == 'Crystal system'].Value.to_string(index=False)
+
+        if system == "Series([], )":
+            return("")
+
         return(system.strip())
 
     def get_wyckoff_sequence(self):
@@ -694,27 +763,20 @@ class Queryer(object):
 
         Return: (string) Wyckoff sequence if available, empty string otherwise
         """
-        # element = self.driver.find_element_by_id('textfieldPub11')
-
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        wyckoff = df.loc['Wyckoff sequence', 1]
+        _df = self._get_published_crystal_structure_data_panel()
+        wyckoff = _df[_df.Name == 'Wyckoff sequence'].Value.to_string(
+            index=False)
         return(wyckoff.strip())
-
-
-        return(element.get_attribute('value').strip())
 
     def get_formula_units_per_cell(self):
         """
         Use By.ID to locate 'Formula Units per Cell' ['textfieldPub3'], parse
         its 'value' attribute.
-
         Return: (integer) Formula units per unit cell
         """
-        print("'Formula Units per Cell' seems to be removed")
-        return("")
-        element = self.driver.find_element_by_id('textfieldPub3')
-        return(int(element.get_attribute('value').strip()))
+        _df = self._get_published_crystal_structure_data_panel()
+        z = _df[_df.Name == 'Z'].Value.to_string(index=False)
+        return(int(z.strip()))
 
     def get_pearson(self):
         """
@@ -726,11 +788,10 @@ class Queryer(object):
 
         Return: (string) Pearson symbol if available, empty string otherwise
         """
+        _df = self._get_published_crystal_structure_data_panel()
 
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        df.to_csv('tmp.csv')
-        pearson = df.loc['Pearson symbol', 1]
+        pearson = _df[_df.Name == 'Pearson symbol'].Value.to_string(
+            index=False)
         return(pearson.strip())
 
     def get_crystal_class(self):
@@ -743,22 +804,31 @@ class Queryer(object):
 
         Return: (string) Crystal class if available, empty string otherwise
         """
-        table = self.get_html_table(idx=3)
-        df = pd.read_html(table, index_col=0)
-        crystal_class = df.iloc[2, 4]
-        # element = self.driver.find_element_by_id('textfieldPub9')
-        return(crystal_class.strip())
+        _df = self._get_published_crystal_structure_data_panel()
+        crystalclass = _df[_df.Name ==
+                           'Crystal class'].Value.to_string(index=False)
+
+        if crystalclass == "Series([], )":
+            return("")
+
+        return(crystalclass.strip())
 
     def get_structural_prototype(self):
         """
-        Probably abolished?
-
         Use By.ID to locate 'Structure Type' ['textfieldPub12'], parse its
         'value' attribute.
 
         Return: (string) Structure type if available, empty string otherwise
         """
-        return("")
+        _df = self._get_published_crystal_structure_data_panel()
+        stype = _df[_df.Name == 'Structure type'].Value
+
+        if len(stype) == 0:
+            return("")
+
+        crystalclass = stype.to_string(index=False)
+        return(crystalclass.strip())
+        # return("")
 
     # panel: "Bibliography"
     def _get_references(self, n):
@@ -788,19 +858,27 @@ class Queryer(object):
 
     def get_reference_2(self):
         """
+        '2nd Reference' seems to be abolished on ICSD 4.2.0.
+        Following comments are for previous versions
+
         Parse '2nd Reference' on the 'Detailed View' page.
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return(self._get_references(1))
+        return("")  # Abolished
+        # return(self._get_references(1))
 
     def get_reference_3(self):
         """
+        '2nd Reference' seems to be abolished on ICSD 4.2.0.
+        Following comments are for previous versions
+
         Parse '3rd Reference' on the 'Detailed View' page.
 
         Return: (string) Reference if available, empty string otherwise
         """
-        return(self._get_references(2))
+        return("")  # Abolished
+        # return(self._get_references(2))
 
     def _clean_reference_string(self, r):
         """
@@ -817,6 +895,7 @@ class Queryer(object):
         return(r)
 
     def _parse_two_column_table(self, df):
+        assert df.shape[1] == 5
         df1 = df.loc[:, 0:1]
         df2 = df.loc[:, 3:5]
 
@@ -833,13 +912,13 @@ class Queryer(object):
             return([])
 
         df = pd.read_html(table)[0]
-        df = self._parse_two_column_tables(df)
+        df = self._parse_two_column_table(df)
 
         warnings = df[df.Name == key].Value.tolist()
         return(warnings)
 
-
     # panel: "Warnings & Comments"
+
     def get_warnings(self):
         """
         Use By.ID to locate 'Warnings & Comments' ('ir_a_8_81a3e') block, then
@@ -848,15 +927,6 @@ class Queryer(object):
 
         Return: (list) A list of warnings if any, empty list otherwise
         """
-
-
-        # warnings = []
-        # block_element = self.driver.find_element_by_id('ir_a_8_81a3e')
-        # warning_nodes = block_element.find_elements_by_xpath(
-        #     ".//table/tbody/tr")
-        # for node in warning_nodes:
-        #     if node.text:
-        #         warnings.append(node.text.strip().replace('\n', ' '))
         return(self._get_additional_info("Warnings"))
 
     def get_comments(self):
@@ -882,17 +952,10 @@ class Queryer(object):
 
         Return: (string) Temperature if available, empty string otherwise
         """
-        temperature = ''
-
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=0)
-        temperature = df.loc['Temperature', 1]
-        return(temperature.strip())
-        # tag = ICSD_PARSE_TAGS['temperature']
-        # xpath = "//div[text()[contains(., '{}')]]/../../td/input".format(tag)
-        # nodes = self.driver.find_elements_by_xpath(xpath)
-        # temperature = nodes[0].get_attribute('value').strip()
-        return(temperature)
+        _df = self._get_experimental_information_panel()
+        raw_text = _df[_df.Name == 'Temperature'].Value.to_string(index=False)
+        raw_text = raw_text.replace("[", "").replace("]", "")
+        return(raw_text.strip())
 
     def get_pressure(self):
         """
@@ -905,10 +968,10 @@ class Queryer(object):
 
         Return: (string) Pressure if available, empty string otherwise
         """
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=3)
-        pressure = df.loc['Pressure', 4]
-        return(pressure.strip())
+        _df = self._get_experimental_information_panel()
+        raw_text = _df[_df.Name == 'Pressure'].Value.to_string(index=False)
+        raw_text = raw_text.replace("[", "").replace("]", "")
+        return(raw_text.strip())
 
     def get_R_value(self):
         """
@@ -921,10 +984,12 @@ class Queryer(object):
 
         Return: (float) R-value if available, None otherwise
         """
-        table = self.get_html_table(idx=17)
-        df = pd.read_html(table, index_col=0)
-        pressure = df.loc['R-value', 1]
-        return(pressure.strip())
+        _df = self._get_experimental_information_panel()
+        raw_text = _df[_df.Name == 'R-value'].Value.to_string(index=False)
+
+        if raw_text == "Series([], )":
+            return(None)
+        return(float(raw_text.strip()))
 
     # checkboxes
     def _is_checkbox_enabled(self, tag_key):
@@ -949,11 +1014,9 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Radiation type
         """
-        # table = self.get_html_table(idx=17)
-        # df = pd.read_html(table, index_col=0)[0]
-        # rad_type = df.loc['Radiation type', 1]
-        _df = self._get_experimental_information_table()
-        rad_type = _df[_df.Name == 'Radiation type'].Value.to_string()
+        _df = self._get_experimental_information_panel()
+        rad_type = _df[_df.Name ==
+                       'Radiation type'].Value.to_string(index=False)
         return(rad_type.strip())
 
     # subpanel: "Radiation Type"
@@ -964,44 +1027,55 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Radiation Type
         """
-        return('X-ray' == self._get_radiation_type())
+        rad_type = self._get_radiation_type()
 
-        # return(self._is_checkbox_enabled('x_ray'))
+        return('X-Ray' == rad_type)
 
     def is_electron_diffraction(self):
         """
         Is the 'Electrons' checkbox enabled?
         """
-        return('Electrons' == self._get_radiation_type())
+        if 'Electron' == self._get_radiation_type():
+            return(True)
+
+        if "Electron microscopy (powder)" in self._get_remarks():
+            return(True)
+
+        return(False)
+
         # return(self._is_checkbox_enabled('electron_diffraction'))
 
     def is_neutron_diffraction(self):
         """
         Is the 'Neutrons' checkbox enabled?
         """
-        return('Neutrons' == self._get_radiation_type())
-        # return(self._is_checkbox_enabled('neutron_diffraction'))
+        return('Neutron' == self._get_radiation_type())
 
     def is_synchrotron(self):
         """
         Is the 'Synchrotron' checkbox enabled?
         """
         return('Synchrotron' == self._get_radiation_type())
-        # return(self._is_checkbox_enabled('synchrotron'))
 
-    def _get_experimental_information_table(self):
+    def _get_bibliography_panel(self):
+        table = self.get_html_table(idx=16)
+        df = pd.read_html(table)[0]
+        df = self._parse_two_column_table(df)
+        return(df)
+
+    def get_abstract(self):
+        _df = self._get_bibliography_panel()
+        abstract = _df[_df.Name == 'Abstract'].Value
+
+        if len(abstract) == 0:
+            return("")
+
+        return(abstract.to_string(index=False))
+
+    def _get_experimental_information_panel(self):
         table = self.get_html_table(idx=17)
         df = pd.read_html(table)[0]
-
-        # df1 = df.loc[:, 0:1]
-        # df2 = df.loc[:, 3:5]
-
-        # df1.columns = ['Name', "Value"]
-        # df2.columns = ['Name', "Value"]
-
-        # df = pd.concat([df1, df2], axis=0)
         df = self._parse_two_column_table(df)
-
         return(df)
 
     def _get_sample_type(self):
@@ -1009,12 +1083,9 @@ class Queryer(object):
         details.xhtml > Details
         > Experimental information > Sample type
         """
-        # table = self.get_html_table(idx=17)
-        # df = pd.read_html(table, index_col=3)[0]
-        # print(df)
-        # sample_type = df.loc['Sample type', 4]
-        _df = self._get_experimental_information_table()
-        sample_type = _df[_df.Name == 'Sample type'].Value.to_string()
+        _df = self._get_experimental_information_panel()
+        sample_type = _df[_df.Name ==
+                          'Sample type'].Value.to_string(index=False)
         return(sample_type.strip())
 
     # subpanel: "Sample Type"
@@ -1022,24 +1093,20 @@ class Queryer(object):
         """
         Is the 'Powder' checkbox enabled?
         """
-        return("Powder" == self._get_sample_type())
-        # return(self._is_checkbox_enabled('powder'))
+        return("Powder data" == self._get_sample_type())
 
     def is_single_crystal(self):
         """
         Is the 'Single-Cystal' checkbox enabled?
         """
         return("Single crystal" == self._get_sample_type())
-        # return(self._is_checkbox_enabled('single_crystal'))
 
     def _get_remarks(self):
         """
         details.xhtml > Details
         > Experimental information > Remarks
         """
-
-        # remarks = df.loc['Remarks', 1]
-        df = self._get_experimental_information_table()
+        df = self._get_experimental_information_panel()
         remarks = list(df[df.Name == 'Remarks'].Value)
         remarks = [s.strip() for s in remarks]
         return(remarks)
@@ -1050,10 +1117,7 @@ class Queryer(object):
         Is the 'Twinned Crystal Data' checkbox enabled?
         """
         remarks = self._get_remarks()
-        print(remarks)
         return("Structure determined on a twinned crystal" in remarks)
-        # return("Single crystal" == self._get_sample_type())
-        # return(self._is_checkbox_enabled('twinned_crystal_data'))
 
     def is_rietveld_employed(self):
         """
@@ -1071,19 +1135,13 @@ class Queryer(object):
         """
         remarks = self._get_remarks()
         return("Absolute Configuration Determined" in remarks)
-        # return(self._is_checkbox_enabled('rietveld_employed'))
-
-        # return(self._is_checkbox_enabled('absolute_config_determined'))
 
     def is_experimental_PDF_number(self):
         """
         Is the 'Experimental PDF Number assigned' checkbox enabled?
         """
-        _df = self._get_experimental_information_table()
-        # sample_type = _df[_df.Name == 'Sample type'].Value
+        _df = self._get_experimental_information_panel()
         return("PDF exp." in _df.columns.values)
-
-        # return(self._is_checkbox_enabled('experimental_PDF_number)'))
 
     def is_temperature_factors_available(self):
         """
@@ -1091,14 +1149,12 @@ class Queryer(object):
         """
         remarks = self._get_remarks()
         return("Temperature factors available" in remarks)
-        # return(self._is_checkbox_enabled('temperature_factors_available'))
 
     def is_magnetic_structure_available(self):
         """
         Is the 'Magnetic Structure Available' checkbox enabled?
         """
-        return(False) # Where can I find this?
-        # return(self._is_checkbox_enabled('magnetic_structure_available'))
+        return(False)  # Where can I find this?
 
     def is_anharmonic_temperature_factors_given(self):
         """
@@ -1106,15 +1162,13 @@ class Queryer(object):
         """
         remarks = self._get_remarks()
         return("Anharmonic temperature factors given" in remarks)
-        # return(self._is_checkbox_enabled('anharmonic_temperature_factors_given'))
 
     def is_calculated_PDF_number(self):
         """
         Is the 'Calculated PDF Number assigned' checkbox enabled?
         """
-        _df = self._get_experimental_information_table()
+        _df = self._get_experimental_information_panel()
         return("PDF calc." in _df.columns.values)
-        # return(self._is_checkbox_enabled('calculated_PDF_number'))
 
     def is_NMR_data_available(self):
         """
@@ -1122,13 +1176,11 @@ class Queryer(object):
         """
         remarks = self._get_remarks()
         return("NMR spectroscopy data given" in remarks)
-        # return(self._is_checkbox_enabled('NMR_data_available'))
 
     def is_correction_of_previous(self):
         """
         Is the 'Correction of Earlier Work' checkbox enabled?
         """
-        # return(self._is_checkbox_enabled('correction_of_previous'))
         remarks = self._get_remarks()
         return("This publication corrects errors in an earlier one" in remarks)
 
@@ -1136,7 +1188,6 @@ class Queryer(object):
         """
         Is the 'Cell Constants without s.d.' checkbox enabled?
         """
-        # return(self._is_checkbox_enabled('cell_constants_without_sd'))
         remarks = self._get_remarks()
         return("Standard deviation missing in cell constants" in remarks)
 
@@ -1154,7 +1205,6 @@ class Queryer(object):
         """
         remarks = self._get_remarks()
         return("Polytype structure" in remarks)
-        # return(self._is_checkbox_enabled('polytype'))
 
     def is_is_prototype_structure(self):
         """
@@ -1163,11 +1213,9 @@ class Queryer(object):
         remarks = self._get_remarks()
         for remark in remarks:
             if "rototype" in remark:
-            #  Could not figure out where should I look
                 return(True)
 
         return(False)
-        # return(self._is_checkbox_enabled('is_prototype_structure'))
 
     def is_order_disorder(self):
         """
@@ -1189,18 +1237,16 @@ class Queryer(object):
         """
         remarks = self._get_remarks()
         return("Disordered structure that cannot adequately be described by numerical parameters" in remarks)
-        # return(self._is_checkbox_enabled('disordered'))
 
     def is_mineral(self):
         """
         Is the 'Mineral' checkbox enabled?
         """
-        df = self._get_chemistry_table()
-        if "Mineral name" in df.columns.values:
+        df = self._get_chemistry_panel()
+        if "Mineral name" in df.Name.values:
             return(True)
 
         return(False)
-        # reeurn(self._is_checkbox_enabled('mineral'))
 
     def is_is_structure_prototype(self):
         """
@@ -1208,12 +1254,8 @@ class Queryer(object):
         """
         table = self.get_html_table(idx=7)
         df = pd.read_html(table)[0]
-        ic(df)
         df = self._parse_two_column_table(df)
         return("Transformation info" in df.columns.values)
-        # temperature = df.loc['Temperature', 1]
-        # return(temperature.strip())
-        # return(self._is_checkbox_enabled('is_structure_prototype'))
 
     def export_CIF(self, base_filename='ICSD_Coll_Code'):
         """
@@ -1230,13 +1272,9 @@ class Queryer(object):
                            "ICSD_Coll_Code_18975.cif"
         """
         self.wait_for_ajax()
-        element = self.driver.find_element_by_xpath("//button[@id='display_form:btnEntryDownloadCif']/span[2]")
+        element = self.driver.find_element_by_xpath(
+            "//button[@id='display_form:btnEntryDownloadCif']/span[2]")
         self.driver.execute_script("arguments[0].click();", element)
-        # filename_element = self.driver.find_element_by_id(
-        #     'fileNameForExportToCif')
-        # filename_element.clear()
-        # filename_element.send_keys(base_filename)
-        # self.driver.find_element_by_id('aExportCifFile').click()
 
     def save_screenshot(self, size=None, fname='ICSD.png'):
         """
@@ -1261,7 +1299,12 @@ class Queryer(object):
         """
         Post the query to form, parse data for all the entries. (wrapper)
         """
-        # self.select_structure_source()
+        element = WebDriverWait(self.driver, 20).until(
+            ec.element_to_be_clickable((
+                By.NAME, "content_form:btnRunQuery"
+            )))
+        # Wait until button appears
+        self.select_structure_source()
         self.post_query_to_form()
         self._click_select_all()
         self._click_show_detailed_view()
