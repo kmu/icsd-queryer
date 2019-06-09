@@ -7,22 +7,20 @@ import time
 
 
 class CollectionCoder():
-    def __init__(self):
+    def __init__(self, first_code=0, n_codes=10000):
         self.q = Queryer(structure_source="A")
         self.q.select_structure_source()
         self.q.driver.find_element_by_link_text("DB Info").click()
-
         self.previous_code = 0
-
-    def run(self, first_code=1):
-        last_code = first_code + 9999
-        code_range = "{0}-{1}".format(first_code, last_code)
-
+        last_code = first_code + n_codes
+        self.code_range = "{0}-{1}".format(first_code, last_code)
         textbox = self.q.driver.find_element_by_id("content_form:uiCodeCollection:input:input")
-        textbox.send_keys(code_range)
+        textbox.send_keys(self.code_range)
         self.q._run_query()
-
         self.q._check_list_view()
+
+    def run(self):
+
         n_hits = self.q.hits
         n_pages = round(n_hits / 10)
 
@@ -37,9 +35,9 @@ class CollectionCoder():
                     By.CSS_SELECTOR, ".ui-icon-seek-next"
                 )))
             # element.click()
-            # self._save_csv(page, n_pages, code_range)
+            # self._save_csv(page, n_pages, self.code_range)
             _df = self._get_df()
-            filename = "each/{0}-p{1}outof{2}ps.csv".format(code_range, page, n_pages)
+            filename = "each/{0}-p{1}outof{2}ps.csv".format(self.code_range, page, n_pages)
             _df.to_csv(filename)
 
             df_list.append(_df)
@@ -50,7 +48,7 @@ class CollectionCoder():
             self.q.wait_for_ajax()
 
         combined_df = pd.concat(df_list)
-        combined_df.to_csv("combined/comb_{}.csv".format(code_range))
+        combined_df.to_csv("combined/comb_{}.csv".format(self.code_range))
 
     def _get_df(self):
         _df = self._get_current_df()
@@ -68,15 +66,15 @@ class CollectionCoder():
         self.q.page_obatained = False  # Refresh
         return(df)
 
-    # def _save_csv(self, page, n_pages, code_range):
+    # def _save_csv(self, page, n_pages, self.code_range):
 
 
 
 
 def main():
     for i in range(100):
-        cc = CollectionCoder()
-        cc.run(i * 10000 + 1)
+        cc = CollectionCoder(i * 10000 + 1)
+        cc.run()
 
 if __name__ == '__main__':
     main()
