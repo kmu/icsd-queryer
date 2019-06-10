@@ -294,6 +294,12 @@ class Queryer(object):
         Use By.ID to locate the 'Select All' ('LVSelect') button, and click it.
         """
         self.wait_for_ajax()
+
+        WebDriverWait(self.driver, 60).until(
+            ec.presence_of_element_located((
+                By.ID, 'footer_middle'
+            )))
+
         element = self.driver.find_element_by_id(
             'display_form:listViewTable:uiSelectAllRows_input')
         self.wait_for_ajax()
