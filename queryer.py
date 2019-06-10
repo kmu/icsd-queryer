@@ -449,6 +449,8 @@ class Queryer(object):
             sys.stdout.flush()
             entries_parsed.append(coll_code)
 
+            self.save_entire_page(coll_code)
+
             if self.hits != 1:
                 self._go_to_next_entry()
 
@@ -457,6 +459,13 @@ class Queryer(object):
         self.quit()
         sys.stdout.write(' done.\n')
         return(entries_parsed)
+
+    def save_entire_page(self, coll_code):
+        source = self.driver.page_source
+
+        with open("{}/source.html".format(coll_code), "w") as f:
+            f.write(source)
+
 
     def _go_to_next_entry(self):
         """
