@@ -627,6 +627,16 @@ class Queryer(object):
         reference = _df[_df.Name == 'Reference'].Value.to_string(index=False)
         return(reference.strip().replace('\n', ' '))
 
+    def get_data_quality(self):
+
+        _df = self._get_summary_panel()
+        quality = _df[_df.Name == 'Data quality'].Value
+        if len(quality) == 0:
+            return("")
+
+        quality = quality.to_string(index=False)
+        return(quality.strip().replace('\n', ' '))
+
     # panel: "Summary"
     def _get_summary_panel(self):
         table = self.get_html_table(idx=0)
