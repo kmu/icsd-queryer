@@ -9,3 +9,7 @@ meta_data.json
 *.cif
 expected
 .idea
+*.html
+*.json
+each
+combined
