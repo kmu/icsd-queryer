@@ -23,7 +23,8 @@ class CollectionCoder():
         self.q = Queryer(structure_source="A")
         self.q.select_structure_source()
         self.q.driver.find_element_by_link_text("DB Info").click()
-        textbox = self.q.driver.find_element_by_id("content_form:uiCodeCollection:input:input")
+        textbox = self.q.driver.find_element_by_id(
+            "content_form:uiCodeCollection:input:input")
         textbox.send_keys(self.code_range)
         self.q._run_query()
         self.q._check_list_view()
@@ -32,8 +33,8 @@ class CollectionCoder():
         if os.path.exists(self.combined_csv_path):
             return()
 
-
-        select = Select(self.q.driver.find_element_by_id("display_form:listViewTable:j_id12"))
+        select = Select(self.q.driver.find_element_by_id(
+            "display_form:listViewTable:j_id12"))
         # select.select_by_visible_text('10')
         select.select_by_value('50')
 
@@ -59,7 +60,6 @@ class CollectionCoder():
                 )
             )
 
-
             self.q._wait_until_dialogue_disappears()
             self.q.wait_for_ajax()
             element = WebDriverWait(self.q.driver, 20).until(
@@ -69,7 +69,8 @@ class CollectionCoder():
             # element.click()
             # self._save_csv(page, n_pages, self.code_range)
             _df = self._get_df()
-            filename = "each/{0}-p{1}outof{2}ps.csv".format(self.code_range, page, n_pages)
+            filename = "each/{0}-p{1}outof{2}ps.csv".format(
+                self.code_range, page, n_pages)
             _df.to_csv(filename)
 
             df_list.append(_df)
@@ -78,7 +79,6 @@ class CollectionCoder():
             # self.q.driver.find_element_by_css_selector(".ui-icon-seek-next").click()
             self.q._wait_until_dialogue_disappears()
             self.q.wait_for_ajax()
-
 
         combined_df = pd.concat(df_list)
 
@@ -103,8 +103,6 @@ class CollectionCoder():
     # def _save_csv(self, page, n_pages, self.code_range):
 
 
-
-
 def main():
     for i in range(100):
         try:
@@ -112,6 +110,7 @@ def main():
             cc.run()
         except queryer.QueryerError:
             pass
+
 
 if __name__ == '__main__':
     main()
