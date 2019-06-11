@@ -113,7 +113,14 @@ def main():
             cc = CollectionCoder(i * 10000 + 1)
             cc.run()
         except queryer.QueryerError:
+            with open(cc.combined_csv_path, "w") as f:
+                f.write("")
+
             cc.quit()
+
+        time.sleep(10)
+
+
 
 
 if __name__ == '__main__':
