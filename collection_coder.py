@@ -103,7 +103,8 @@ class CollectionCoder():
         return(df)
 
     def quit(self):
-        self.q.quit()
+        pass
+        # self.q.quit()
     # def _save_csv(self, page, n_pages, self.code_range):
 
 
@@ -116,9 +117,12 @@ def main():
             with open(cc.combined_csv_path, "w") as f:
                 f.write("")
 
-            cc.quit()
+            print("No entry found in this step")
+            # cc.quit()
+            # time.sleep(10)
 
-        time.sleep(10)
+        print("Cycle {} of 100".format(i))
+
 
 
 
