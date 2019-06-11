@@ -85,6 +85,7 @@ class CollectionCoder():
         combined_df.to_csv(self.combined_csv_path)
         # self.q.driver.close()
 
+
     def _get_df(self):
         _df = self._get_current_df()
         while self.previous_code == _df['Coll. Code'].min():
@@ -101,6 +102,8 @@ class CollectionCoder():
         self.q.page_obatained = False  # Refresh
         return(df)
 
+    def quit(self):
+        self.q.quit()
     # def _save_csv(self, page, n_pages, self.code_range):
 
 
@@ -110,7 +113,7 @@ def main():
             cc = CollectionCoder(i * 10000 + 1)
             cc.run()
         except queryer.QueryerError:
-            pass
+            cc.quit()
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 import argparse
-import metadata
 from all_entries import main as scrape_all
 from collection_coder import main as enumerate_all
 from sys import argv
@@ -25,7 +24,7 @@ def command_scrape(args):
         queryer.perform_icsd_query()
 
 
-def command_enumerate():
+def command_enumerate(args):
     enumerate_all()
 
 
@@ -36,10 +35,6 @@ def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    parser.add_argument(
-        '-V', '--version',
-        action='version',
-        version='{0} {1}'.format(metadata.project, metadata.version))
     parser_scrape = subparsers.add_parser('scrape', help='scrape ICSD')
     parser_scrape.add_argument('-A', '--all', action='store_true',
                                help='scrape everything using ICSD Collection Code')

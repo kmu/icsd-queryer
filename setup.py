@@ -1,8 +1,8 @@
 from setuptools import setup
-import metadata
 
 setup(
-    name=metadata.project,
+    version='0.0.2',
+    name='icsd-queryer',
     install_requires=["PyYAML","beautifulsoup4", "selenium", "PyVirtualDisplay", "pandas"],
     entry_points={
         "console_scripts": [
@@ -10,6 +10,5 @@ setup(
         ]
     },
     maintainer="Koki Muraoka",
-    maintainer_email="KMuraoka@lbl.gov",
-    version=metadata.version
+    maintainer_email="KMuraoka@lbl.gov"
 )
