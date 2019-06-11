@@ -16,3 +16,4 @@ combined
 *.html
 *.html
 *.json
+*.egg-info
