@@ -83,6 +83,7 @@ class CollectionCoder():
         combined_df = pd.concat(df_list)
 
         combined_df.to_csv(self.combined_csv_path)
+        # self.q.driver.close()
 
     def _get_df(self):
         _df = self._get_current_df()

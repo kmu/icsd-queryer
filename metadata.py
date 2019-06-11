@@ -5,5 +5,5 @@ Information describing the project.
 """
 
 # The package name, which is also the "UNIX name" for the project.
-version = '0.0.1'
+version = '0.0.2'
 project = 'icsd-queryer'
