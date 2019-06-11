@@ -7,6 +7,7 @@ import time
 import os
 import math
 import queryer
+from selenium.webdriver.support.ui import Select
 
 
 class CollectionCoder():
@@ -31,12 +32,33 @@ class CollectionCoder():
         if os.path.exists(self.combined_csv_path):
             return()
 
+
+        select = Select(self.q.driver.find_element_by_id("display_form:listViewTable:j_id12"))
+        # select.select_by_visible_text('10')
+        select.select_by_value('50')
+
+        # self.q._wait_until_dialogue_disappears()
+        # self.q.wait_for_ajax()
+        # self.q._wait_until_dialogue_disappears()
+
+        # class ui-paginator-current
+
         n_hits = self.q.hits
-        n_pages = math.ceil(n_hits / 10)
+        n_pages = math.ceil(n_hits / 50)
 
         df_list = []
 
         for page in range(1, n_pages + 1):
+
+            print("({0} of {1})".format(page, n_pages))
+
+            WebDriverWait(self.q.driver, 60).until(
+                ec.text_to_be_present_in_element(
+                    (By.CLASS_NAME, 'ui-paginator-current'),
+                    "({0} of {1})".format(page, n_pages)
+                )
+            )
+
 
             self.q._wait_until_dialogue_disappears()
             self.q.wait_for_ajax()
