@@ -1,6 +1,25 @@
 import argparse
 import metadata
+from all_entries import main as scrape_all
 
+
+def command_scrape(args):
+    if args.all:
+        scrape_all()
+
+    if args.code > 0:
+        query = {
+            "icsd_collection_code": args.code,
+        }
+        queryer = Queryer(query=query, structure_source=args.source)
+        queryer.perform_icsd_query()
+
+    if args.composition != "":
+        query = {
+            "composition": args.composition,
+        }
+        queryer = Queryer(query=query, structure_source=args.source)
+        queryer.perform_icsd_query()
 
 def main():
     parser = argparse.ArgumentParser()
