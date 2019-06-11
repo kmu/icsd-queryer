@@ -294,6 +294,12 @@ class Queryer(object):
         Use By.ID to locate the 'Select All' ('LVSelect') button, and click it.
         """
         self.wait_for_ajax()
+
+        WebDriverWait(self.driver, 60).until(
+            ec.presence_of_element_located((
+                By.ID, 'footer_middle'
+            )))
+
         element = self.driver.find_element_by_id(
             'display_form:listViewTable:uiSelectAllRows_input')
         self.wait_for_ajax()
@@ -449,6 +455,8 @@ class Queryer(object):
             sys.stdout.flush()
             entries_parsed.append(coll_code)
 
+            self.save_entire_page(coll_code)
+
             if self.hits != 1:
                 self._go_to_next_entry()
 
@@ -457,6 +465,13 @@ class Queryer(object):
         self.quit()
         sys.stdout.write(' done.\n')
         return(entries_parsed)
+
+    def save_entire_page(self, coll_code):
+        source = self.driver.page_source
+
+        with open("{}/source.html".format(coll_code), "w") as f:
+            f.write(source)
+
 
     def _go_to_next_entry(self):
         """
@@ -617,6 +632,16 @@ class Queryer(object):
         _df = self._get_summary_panel()
         reference = _df[_df.Name == 'Reference'].Value.to_string(index=False)
         return(reference.strip().replace('\n', ' '))
+
+    def get_data_quality(self):
+
+        _df = self._get_summary_panel()
+        quality = _df[_df.Name == 'Data quality'].Value
+        if len(quality) == 0:
+            return("")
+
+        quality = quality.to_string(index=False)
+        return(quality.strip().replace('\n', ' '))
 
     # panel: "Summary"
     def _get_summary_panel(self):
