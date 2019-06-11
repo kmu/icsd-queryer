@@ -8,4 +8,6 @@ install:
 # command to run tests
 script:
   - icsd
+  - icsd --help
+  - icsd --version
 #   - nosetests tests/*
