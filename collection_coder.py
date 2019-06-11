@@ -4,29 +4,39 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 import time
+import os
+import math
+import queryer
 
 
 class CollectionCoder():
     def __init__(self, first_code=0, n_codes=10000):
+        self.previous_code = 0
+        last_code = first_code + n_codes - 1
+        self.code_range = "{0}-{1}".format(first_code, last_code)
+        self.combined_csv_path = "combined/comb_{}.csv".format(self.code_range)
+
+        if os.path.exists(self.combined_csv_path):
+            return(None)
+
         self.q = Queryer(structure_source="A")
         self.q.select_structure_source()
         self.q.driver.find_element_by_link_text("DB Info").click()
-        self.previous_code = 0
-        last_code = first_code + n_codes
-        self.code_range = "{0}-{1}".format(first_code, last_code)
         textbox = self.q.driver.find_element_by_id("content_form:uiCodeCollection:input:input")
         textbox.send_keys(self.code_range)
         self.q._run_query()
         self.q._check_list_view()
 
     def run(self):
+        if os.path.exists(self.combined_csv_path):
+            return()
 
         n_hits = self.q.hits
-        n_pages = round(n_hits / 10)
+        n_pages = math.ceil(n_hits / 10)
 
         df_list = []
 
-        for page in range(1, n_pages+1):
+        for page in range(1, n_pages + 1):
 
             self.q._wait_until_dialogue_disappears()
             self.q.wait_for_ajax()
@@ -47,8 +57,10 @@ class CollectionCoder():
             self.q._wait_until_dialogue_disappears()
             self.q.wait_for_ajax()
 
+
         combined_df = pd.concat(df_list)
-        combined_df.to_csv("combined/comb_{}.csv".format(self.code_range))
+
+        combined_df.to_csv(self.combined_csv_path)
 
     def _get_df(self):
         _df = self._get_current_df()
@@ -73,8 +85,11 @@ class CollectionCoder():
 
 def main():
     for i in range(100):
-        cc = CollectionCoder(i * 10000 + 1)
-        cc.run()
+        try:
+            cc = CollectionCoder(i * 10000 + 1)
+            cc.run()
+        except queryer.QueryerError:
+            pass
 
 if __name__ == '__main__':
     main()
