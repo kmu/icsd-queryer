@@ -1,5 +1,5 @@
 import argparse
-from metadat import *
+from metadata import *
 
 
 def main():
