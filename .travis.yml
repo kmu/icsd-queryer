@@ -8,5 +8,4 @@ install:
 script:
   - icsd
   - icsd --help
-  - icsd --version
-#   - nosetests tests/*
+  - nosetests tests/*
