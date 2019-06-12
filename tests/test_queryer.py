@@ -11,14 +11,19 @@ from queryer import Queryer
 import unittest
 
 
+is_mac = platform.system() == 'Darwin'
+
+
 class TestQueryer(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_dummy_data(self):
         queryer = Queryer()
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_AlOF(self):
         query = {
             'composition': 'Al O F',
@@ -28,6 +33,7 @@ class TestQueryer(unittest.TestCase):
         queryer.perform_icsd_query()
         self.assertEqual(2, queryer.hits)
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_metadata(self):
         query = {
             "composition": "H:18:18 Al:6:6 O:28:28 P:4:4",
@@ -51,6 +57,7 @@ class TestQueryer(unittest.TestCase):
 
         self.assertDictEqual(expected_dict, crawled_dict)
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_cell_parameter(self):
         code = 251445
         query = {
@@ -75,6 +82,7 @@ class TestQueryer(unittest.TestCase):
 
         self.assertDictEqual(expected_dict, crawled_dict)
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_reference_3(self):
         """
         This entry does not have DOI.
@@ -108,6 +116,7 @@ class TestQueryer(unittest.TestCase):
 
         self.assertDictEqual(expected_dict, crawled_dict)
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_all_structures(self):
         code = 44278
         query = {
@@ -123,6 +132,7 @@ class TestQueryer(unittest.TestCase):
 
         assert crawled_dict['theoretical_calculation'] == True
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_theory(self):
         code = 195347
         query = {
@@ -147,6 +157,7 @@ class TestQueryer(unittest.TestCase):
 
         self.assertDictEqual(expected_dict, crawled_dict)
 
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_double_column(self):
         code = 251776
         query = {

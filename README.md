@@ -11,7 +11,7 @@ Tested on ChromeDriver 2.29.
 Compatible with ICSD Version 4.2.0 (build 20190513-1424) - Data Release 2019.1
 
 ```
-pip install -r requirements.txt
+pip install -e .
 ```
 
 

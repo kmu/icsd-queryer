@@ -5,8 +5,9 @@ import time
 
 
 class AllEntries():
-    def __init__(self, first_code=0, n_codes=1000):
-        self.cc = CollectionCoder(first_code, n_codes)
+    def __init__(self, first_code, last_code):
+        self.cc = CollectionCoder(first_code, last_code)
+        self.cc.init_driver()
 
     def run(self):
         time.sleep(3)
@@ -21,7 +22,7 @@ def main():
     # ae = AllEntries(50000)
 
     for i in range(1000):
-        ae = AllEntries(i*1000+600000)
+        ae = AllEntries(i*1000, i*1000+999)
         ae.run()
 
 if __name__ == '__main__':
