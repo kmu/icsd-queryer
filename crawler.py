@@ -18,7 +18,7 @@ class Crawler(object):
             return(-1)
 
         start = self.not_yet_crawled[0]
-        end = self.all_codes[self.all_codes.index(start) + 999]
+        end = self.all_codes[self.all_codes.index(start) + 99]  # 100 is the maximum of DL
 
         within_val = get_within_value(start, end)
 
