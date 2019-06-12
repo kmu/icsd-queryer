@@ -18,3 +18,4 @@ combined
 *.json
 *.egg-info
 all_collection_code.csv
+*.csv
