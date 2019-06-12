@@ -17,24 +17,15 @@ class Crawler(object):
 
             return(-1)
 
-
-        # not_yet_crawled = self.to_be_crawled - crawled
-        # print(not_yet_crawled)
         start = self.not_yet_crawled[0]
         end = self.all_codes[self.all_codes.index(start) + 999]
 
-        # if end >= self.not_yet_crawled[1]:
-            # end = self.not_yet_crawled[1] - 1
         within_val = get_within_value(start, end)
 
         if within_val > 0:
             end = within_val - 1
 
         return("{0}-{1}".format(start, end))
-
-        # end = 1000
-
-
 
     def refresh(self):
         paths = glob.glob("combined/*.csv")
@@ -68,39 +59,22 @@ class Crawler(object):
     def run(self):
         self.refresh()
 
-        from icecream import ic
         start = 1
 
         while True:
             end = start + 1000
 
             while start <= min(crawled) and min(crawled) <= end:
-                # ic(start)
-                # ic(end)
-                # ic(crawled)
 
                 if start == min(crawled):
                     start = cdf[cdf["Coll. Code"] > start]["Coll. Code"].min()
                     crawled = list(filter(lambda a: a >= start, crawled))
                 else:
-                    # end = min(crawled) - 1
-                    end = cdf[cdf["Coll. Code"] < end]["Coll. Code"].max()
+                   eend = cdf[cdf["Coll. Code"] < end]["Coll. Code"].max()
                     crawled = list(filter(lambda a: a <= end, crawled))
-
-                # crawled.remove(min(crawled))
-                # for val in crawled:
-
-
-
-                # if end == 0:
-                    # start += 1
-            # ic(start)
-            # ic(end)
-            # ic(crawled)
 
 
             ae = AllEntries(start, end)
             ae.run()
 
             start = cdf[cdf["Coll. Code"] > end]["Coll. Code"].min()
-
