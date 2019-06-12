@@ -25,7 +25,7 @@ class Crawler(object):
         if within_val > 0:
             end = within_val - 1
 
-        return("{0}-{1}".format(start, end))
+        return(start, end)
 
     def refresh(self):
         paths = glob.glob("combined/*.csv")
@@ -59,22 +59,15 @@ class Crawler(object):
     def run(self):
         self.refresh()
 
-        start = 1
 
-        while True:
-            end = start + 1000
-
-            while start <= min(crawled) and min(crawled) <= end:
-
-                if start == min(crawled):
-                    start = cdf[cdf["Coll. Code"] > start]["Coll. Code"].min()
-                    crawled = list(filter(lambda a: a >= start, crawled))
-                else:
-                   eend = cdf[cdf["Coll. Code"] < end]["Coll. Code"].max()
-                    crawled = list(filter(lambda a: a <= end, crawled))
-
+        while len(self.not_yet_crawled) > 0:
+            start, end = self.get_code_range()
 
             ae = AllEntries(start, end)
             ae.run()
 
-            start = cdf[cdf["Coll. Code"] > end]["Coll. Code"].min()
+            self.refresh()
+
+def main():
+    c = Crawler()
+    c.run()

@@ -14,14 +14,14 @@ class TestCrawl(unittest.TestCase):
         crawler.crawled_codes = [60, 61, 100, 103, 105]
         crawler.not_yet_crawled = list(
             set(crawler.all_codes) - set(crawler.crawled_codes))
-        self.assertEqual("1-59", crawler.get_code_range())
+        self.assertEqual((1, 59), crawler.get_code_range())
 
         crawler.crawled_codes = crawler.crawled_codes + [1, 5, 12, 15]
         crawler.not_yet_crawled = list(
             set(crawler.all_codes) - set(crawler.crawled_codes))
-        self.assertEqual("101-102", crawler.get_code_range())
+        self.assertEqual((101, 102), crawler.get_code_range())
 
         crawler.crawled_codes += [101]
         crawler.not_yet_crawled = list(
             set(crawler.all_codes) - set(crawler.crawled_codes))
-        self.assertEqual("108-2095", crawler.get_code_range())
+        self.assertEqual((108, 2095), crawler.get_code_range())

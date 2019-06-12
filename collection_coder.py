@@ -1,5 +1,3 @@
-from queryer import Queryer
-import pandas as pd
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,19 +6,18 @@ import os
 import math
 import queryer
 from selenium.webdriver.support.ui import Select
+from tqdm import tqdm
 
 
 class CollectionCoder():
-    def __init__(self, first_code=0, n_codes=10000):
+    def __init__(self, first_code, last_code):
         self.previous_code = 0
-        last_code = first_code + n_codes - 1
+        # last_code = first_code + n_codes - 1
         self.code_range = "{0}-{1}".format(first_code, last_code)
         self.combined_csv_path = "combined/comb_{}.csv".format(self.code_range)
 
-        if os.path.exists(self.combined_csv_path):
-            return(None)
-
-        self.q = Queryer(structure_source="A")
+    def init_driver(self):
+        self.q = queryer.Queryer(structure_source="A")
         self.q.select_structure_source()
         self.q.driver.find_element_by_link_text("DB Info").click()
         textbox = self.q.driver.find_element_by_id(
@@ -30,8 +27,8 @@ class CollectionCoder():
         self.q._check_list_view()
 
     def run(self):
-        if os.path.exists(self.combined_csv_path):
-            return()
+
+        self.init_driver()
 
         select = Select(self.q.driver.find_element_by_id(
             "display_form:listViewTable:j_id12"))
@@ -103,28 +100,25 @@ class CollectionCoder():
         return(df)
 
     def quit(self):
-        pass
-        # self.q.quit()
+        self.q.quit()
     # def _save_csv(self, page, n_pages, self.code_range):
 
 
 def main():
-    for i in range(100):
+    for i in tqdm(range(100)):
         try:
-            cc = CollectionCoder(i * 10000 + 1)
-            cc.run()
+            cc = CollectionCoder(i * 10000 + 1, i * 10000 + 10000)
+            print(cc.combined_csv_path)
+            if not os.path.exists(cc.combined_csv_path):
+                cc.run()
         except queryer.QueryerError:
             with open(cc.combined_csv_path, "w") as f:
                 f.write("")
 
+
             print("No entry found in this step")
-            # cc.quit()
-            # time.sleep(10)
-
-        print("Cycle {} of 100".format(i))
-
-
-
+            cc.quit()
+            time.sleep(5)
 
 
 if __name__ == '__main__':
