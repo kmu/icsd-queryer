@@ -207,7 +207,9 @@ class Queryer(object):
             number_tag = tag_dict.get(self.structure_source)
             xpath = "//table/tbody/tr/td/label["\
                 "text()[contains(., 'Theoretical structures')]]"
-            radio_label = self.driver.find_element_by_xpath(xpath)
+            # radio_label = self.driver.find_element_by_xpath(xpath)
+            radio_label = WebDriverWait(self.driver, 20).until(
+                ec.element_to_be_clickable((By.XPATH, xpath)))
             radio_label.click()
             self._wait_until_dialogue_disappears()
 
@@ -215,7 +217,9 @@ class Queryer(object):
             number_tag = tag_dict.get(self.structure_source)
             xpath = "//table/tbody/tr/td/label["\
                 "text()[contains(., 'Experim. metal-organic str.')]]"
-            radio_label = self.driver.find_element_by_xpath(xpath)
+            # radio_label = self.driver.find_element_by_xpath(xpath)
+            radio_label = WebDriverWait(self.driver, 20).until(
+                ec.element_to_be_clickable((By.XPATH, xpath)))
             radio_label.click()
 
         self._wait_until_dialogue_disappears()

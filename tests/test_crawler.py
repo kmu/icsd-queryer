@@ -2,7 +2,7 @@ import unittest
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-get_within_value(start, end)
+from crawler import Crawler
 
 
 class TestCrawl(unittest.TestCase):
@@ -24,4 +24,4 @@ class TestCrawl(unittest.TestCase):
         crawler.crawled_codes += [101]
         crawler.not_yet_crawled = list(
             set(crawler.all_codes) - set(crawler.crawled_codes))
-        self.assertEqual((108, 2095), crawler.get_code_range())
+        self.assertEqual((108, 695), crawler.get_code_range())
