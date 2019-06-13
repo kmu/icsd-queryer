@@ -1,13 +1,10 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tests.test_random import abolished_keys, new_keys, conflicting_keys
 import time
 import random
 import glob
 import json
 import platform
-from queryer import Queryer
+from icsd.queryer import Queryer
 import unittest
 
 

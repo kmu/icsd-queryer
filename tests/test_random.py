@@ -3,10 +3,7 @@ import random
 import glob
 import json
 import platform
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from queryer import Queryer
+from icsd.queryer import Queryer
 
 
 
