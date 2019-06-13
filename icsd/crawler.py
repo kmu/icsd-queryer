@@ -2,7 +2,7 @@ import glob
 import pandas as pd
 import os
 import math
-from all_entries import AllEntries
+from icsd.all_entries import AllEntries
 # from logging import getLogger
 import logging
 import time

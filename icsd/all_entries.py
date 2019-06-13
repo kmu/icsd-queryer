@@ -1,6 +1,6 @@
 import pandas as pd
 import glob
-from collection_coder import CollectionCoder
+from icsd.collection_coder import CollectionCoder
 import time
 
 

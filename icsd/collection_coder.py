@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import time
 import os
 import math
-import queryer
+from icsd import queryer
 from selenium.webdriver.support.ui import Select
 from tqdm import tqdm
 
