@@ -3,6 +3,8 @@ import pandas as pd
 import os
 import math
 from all_entries import AllEntries
+import logging
+import time
 
 
 class Crawler(object):
@@ -41,32 +43,37 @@ class Crawler(object):
 
         assert(cdf["Coll. Code"].duplicated() == True).sum() == 0
 
-        print("{} structures are in Collection Code list".format(len(cdf)))
+        logging.info("{} structures are in Collection Code list".format(len(cdf)))
 
         cdf = cdf.sort_values(by=["Coll. Code"])
-        # print(cdf)
 
         crawled = glob.glob("*/source.html")
         crawled = [int(c.split("/")[0]) for c in crawled]
 
         cdf2 = cdf[~cdf["Coll. Code"].isin(crawled)]
-        print("{} structures are not retrieved".format(len(cdf2)))
+        logging.info("{} structures are not retrieved".format(len(cdf2)))
 
         self.crawled_codes = sorted(crawled)
         self.all_codes = cdf["Coll. Code"].tolist()
         self.not_yet_crawled = cdf2["Coll. Code"].tolist()
 
     def run(self):
+        logging.info("Awakening...")
         self.refresh()
 
-
         while len(self.not_yet_crawled) > 0:
-            start, end = self.get_code_range()
+            try:
+                start, end = self.get_code_range()
 
-            ae = AllEntries(start, end)
-            ae.run()
+                ae = AllEntries(start, end)
+                ae.run()
 
-            self.refresh()
+                self.refresh()
+            except Exception as e:
+                logging.error(e)
+                time.sleep(180)
+
+
 
 def main():
     c = Crawler()
