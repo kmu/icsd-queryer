@@ -66,12 +66,13 @@ class Crawler(object):
 
         while len(self.not_yet_crawled) > 0:
             try:
+                self.refresh()
                 start, end = self.get_code_range()
 
                 ae = AllEntries(start, end)
                 ae.run()
 
-                self.refresh()
+                # self.refresh()
             except Exception as e:
                 logging.error(e)
                 time.sleep(180)
