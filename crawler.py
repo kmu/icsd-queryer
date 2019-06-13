@@ -3,13 +3,16 @@ import pandas as pd
 import os
 import math
 from all_entries import AllEntries
-from logging import getLogger
+# from logging import getLogger
+import logging
 import time
 
 
 class Crawler(object):
     def __init__(self):
-        self.logger = getLogger("Log")
+        # logging = getLogger("Log")
+        logging.basicConfig(filename = "selenium.log",  level = logging.INFO,
+                               format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
 
     def get_code_range(self):
         def get_within_value(start, end):
@@ -43,7 +46,7 @@ class Crawler(object):
 
         assert(cdf["Coll. Code"].duplicated() == True).sum() == 0
 
-        self.logger.info("{} structures are in Collection Code list".format(len(cdf)))
+        logging.info("{} structures are in Collection Code list".format(len(cdf)))
 
         cdf = cdf.sort_values(by=["Coll. Code"])
 
@@ -51,14 +54,14 @@ class Crawler(object):
         crawled = [int(c.split("/")[0]) for c in crawled]
 
         cdf2 = cdf[~cdf["Coll. Code"].isin(crawled)]
-        self.logger.info("{} structures are not retrieved".format(len(cdf2)))
+        logging.info("{} structures are not retrieved".format(len(cdf2)))
 
         self.crawled_codes = sorted(crawled)
         self.all_codes = cdf["Coll. Code"].tolist()
         self.not_yet_crawled = cdf2["Coll. Code"].tolist()
 
     def run(self):
-        self.logger.info("Awakening...")
+        logging.info("Awakening...")
         self.refresh()
 
         while len(self.not_yet_crawled) > 0:
