@@ -6,7 +6,7 @@ setup(
     install_requires=["PyYAML","beautifulsoup4", "selenium", "PyVirtualDisplay", "pandas", "tqdm"],
     entry_points={
         "console_scripts": [
-            "icsd = app:main"
+            "icsd = icsd:main"
         ]
     },
     maintainer="Koki Muraoka",

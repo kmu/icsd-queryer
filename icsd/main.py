@@ -1,9 +1,9 @@
 import argparse
-from crawler import main as scrape_all
-from collection_coder import main as enumerate_all
+from icsd.crawler import main as scrape_all
+from icsd.collection_coder import main as enumerate_all
 from sys import argv
 import sys
-from queryer import Queryer
+from icsd.queryer import Queryer
 
 def command_scrape(args):
     if args.all:
