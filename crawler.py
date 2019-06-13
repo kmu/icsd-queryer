@@ -3,13 +3,13 @@ import pandas as pd
 import os
 import math
 from all_entries import AllEntries
-import logging
+from logging import getLogger
 import time
 
 
 class Crawler(object):
     def __init__(self):
-        pass
+        self.logger = getLogger("Log")
 
     def get_code_range(self):
         def get_within_value(start, end):
@@ -43,7 +43,7 @@ class Crawler(object):
 
         assert(cdf["Coll. Code"].duplicated() == True).sum() == 0
 
-        logging.info("{} structures are in Collection Code list".format(len(cdf)))
+        self.logger.info("{} structures are in Collection Code list".format(len(cdf)))
 
         cdf = cdf.sort_values(by=["Coll. Code"])
 
@@ -51,14 +51,14 @@ class Crawler(object):
         crawled = [int(c.split("/")[0]) for c in crawled]
 
         cdf2 = cdf[~cdf["Coll. Code"].isin(crawled)]
-        logging.info("{} structures are not retrieved".format(len(cdf2)))
+        self.logger.info("{} structures are not retrieved".format(len(cdf2)))
 
         self.crawled_codes = sorted(crawled)
         self.all_codes = cdf["Coll. Code"].tolist()
         self.not_yet_crawled = cdf2["Coll. Code"].tolist()
 
     def run(self):
-        logging.info("Awakening...")
+        self.logger.info("Awakening...")
         self.refresh()
 
         while len(self.not_yet_crawled) > 0:
