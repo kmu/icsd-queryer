@@ -1,4 +1,5 @@
 import sys
+import platform
 import os
 import shutil
 import json
@@ -13,6 +14,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+
+from selenium.webdriver.chrome.options import Options
 
 
 pd.options.display.max_colwidth = 1000
@@ -164,12 +167,45 @@ class Queryer(object):
         # start: exited normally"
         ##_options.add_argument('--no-startup-window ')
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
+
         prefs = {
             'download.default_directory': self.download_dir,
             'profile.default_content_setting_values.automatic_downloads': 1
         }
         _options.add_experimental_option("prefs", prefs)
-        return(webdriver.Chrome(chrome_options=_options))
+
+        if platform.system() == "Linux":
+            _options.binary_location = os.environ['CHROME']
+            _options.add_argument('--headless')
+
+
+            _options.add_argument("start-maximized")#// open Browser in maximized mode
+            _options.add_argument("disable-infobars")#// disabling infobars
+            _options.add_argument("--disable-extensions")#// disabling extensions
+            _options.add_argument("--disable-gpu")#// applicable to windows os only
+            _options.add_argument("--disable-dev-shm-usage")#// overcome limited resource problems
+            _options.add_argument("--no-sandbox")#// Bypass OS security model
+
+
+            _options.add_argument("--window-size=1920,1080")
+            _options.add_argument("--disable-gpu")
+            _options.add_argument("--disable-extensions")
+            _options.add_experimental_option("useAutomationExtension", False)
+            _options.add_argument("--proxy-server='direct://'")
+            _options.add_argument("--proxy-bypass-list=*")
+            _options.add_argument("--start-maximized")
+
+            _options.add_argument("--headless")
+            _options.add_argument("--test-type")
+            _options.add_argument("--disable-gpu")
+            _options.add_argument("--no-first-run")
+            _options.add_argument("--no-default-browser-check")
+            _options.add_argument("--ignore-certificate-errors")
+            _options.add_argument("--start-maximized")
+
+            return(webdriver.Chrome(os.environ['CDRIVER'],options=_options))
+
+        return(webdriver.Chrome(options=_options))
 
     def _check_basic_search(self):
         """
@@ -177,6 +213,9 @@ class Queryer(object):
         is not in the element text, raise Error.
         """
         header_id = 'content_form:mainSearchPanel_header'
+
+        source = self.driver.page_source
+        print(source)
         try:
             header = self.driver.find_element_by_id(header_id)
         except:
