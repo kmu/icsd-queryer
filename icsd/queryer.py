@@ -164,6 +164,7 @@ class Queryer(object):
         # start: exited normally"
         ##_options.add_argument('--no-startup-window ')
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
+        # _options.add_argument('--headless')
         prefs = {
             'download.default_directory': self.download_dir,
             'profile.default_content_setting_values.automatic_downloads': 1
