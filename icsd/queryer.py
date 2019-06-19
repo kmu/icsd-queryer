@@ -1,4 +1,5 @@
 import sys
+import platform
 import os
 import shutil
 import json
@@ -13,6 +14,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+
+from selenium.webdriver.chrome.options import Options
 
 
 pd.options.display.max_colwidth = 1000
@@ -148,7 +151,16 @@ class Queryer(object):
         else:
             self._structure_source = structure_source.upper()[0]
 
+    def enable_download_in_headless_chrome(self, browser, download_dir):
+        browser.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
+        browser.execute("send_command", params)
+        # return(browser)
+
     def _initialize_driver(self):
+
+
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
         if os.path.exists(browser_data_dir):
             shutil.rmtree(browser_data_dir, ignore_errors=True)
@@ -164,13 +176,50 @@ class Queryer(object):
         # start: exited normally"
         ##_options.add_argument('--no-startup-window ')
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
-        # _options.add_argument('--headless')
+        _options.add_argument('--headless')
+        _options.add_argument("--disable-gpu")
+        _options.add_argument("--no-sandbox")
+
         prefs = {
             'download.default_directory': self.download_dir,
             'profile.default_content_setting_values.automatic_downloads': 1
         }
         _options.add_experimental_option("prefs", prefs)
-        return(webdriver.Chrome(chrome_options=_options))
+
+        if platform.system() == "Linux":
+            _options.binary_location = os.environ['CHROME']
+            _options.add_argument('--headless')
+
+
+            _options.add_argument("start-maximized")#// open Browser in maximized mode
+            _options.add_argument("disable-infobars")#// disabling infobars
+            _options.add_argument("--disable-extensions")#// disabling extensions
+            _options.add_argument("--disable-gpu")#// applicable to windows os only
+            _options.add_argument("--disable-dev-shm-usage")#// overcome limited resource problems
+            _options.add_argument("--no-sandbox")#// Bypass OS security model
+
+
+            _options.add_argument("--window-size=1920,1080")
+            _options.add_argument("--disable-gpu")
+            _options.add_argument("--disable-extensions")
+            _options.add_experimental_option("useAutomationExtension", False)
+            _options.add_argument("--proxy-server='direct://'")
+            _options.add_argument("--proxy-bypass-list=*")
+            _options.add_argument("--start-maximized")
+
+            _options.add_argument("--headless")
+            _options.add_argument("--test-type")
+            _options.add_argument("--disable-gpu")
+            _options.add_argument("--no-first-run")
+            _options.add_argument("--no-default-browser-check")
+            _options.add_argument("--ignore-certificate-errors")
+            _options.add_argument("--start-maximized")
+
+            return(webdriver.Chrome(os.environ['CDRIVER'],options=_options))
+
+        return(webdriver.Chrome(options=_options))
+
+        # return()
 
     def _check_basic_search(self):
         """
@@ -178,6 +227,7 @@ class Queryer(object):
         is not in the element text, raise Error.
         """
         header_id = 'content_form:mainSearchPanel_header'
+
         try:
             header = self.driver.find_element_by_id(header_id)
         except:
@@ -389,11 +439,14 @@ class Queryer(object):
         Use By.CLASS_NAME to locate 'display_main' elements, split the element text
         with 'Detailed View' in it and return(the last item in )the list.
         """
-        titles = self.driver.find_elements_by_id('display_main')
-        for title in titles:
-            if 'Detailed View' in title.text:
-                n_entries_loaded = int(title.text.split()[5])
-                return(n_entries_loaded)
+        for i in range(10):
+            titles = self.driver.find_elements_by_id('display_main')
+            for title in titles:
+                if 'Detailed View' in title.text:
+                    n_entries_loaded = int(title.text.split()[5])
+                    return(n_entries_loaded)
+
+            time.sleep(1)
 
     def parse_entries(self):
         """
@@ -409,9 +462,10 @@ class Queryer(object):
 
         Return: (list) A list of ICSD Collection Codes of entries parsed
         """
-        if self._get_number_of_entries_loaded() != self.hits:
+        hit_number = self._get_number_of_entries_loaded()
+        if hit_number != self.hits:
             self.quit()
-            error_message = '# Hits != # Entries in Detailed View'
+            error_message = '# Hits ({0}) != # Entries: ({1}) in Detailed View'.format(hit_number, self.hits)
             raise QueryerError(error_message)
 
         sys.stdout.write('Parsing all the entries... \n')
@@ -437,6 +491,7 @@ class Queryer(object):
                 screenshot_file = os.path.join(coll_code, 'screenshot.png')
                 self.save_screenshot(fname=screenshot_file)
 
+            self.enable_download_in_headless_chrome(self.driver, self.download_dir)
             # get the CIF file
             self.export_CIF()
             # uncomment the next few lines for automatic copying of CIF files
