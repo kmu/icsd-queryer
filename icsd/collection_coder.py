@@ -19,7 +19,7 @@ class CollectionCoder():
     def init_driver(self):
         self.q = queryer.Queryer(structure_source="A")
         self.q.select_structure_source()
-        self.q.driver.find_element_by_link_text("DB Info").click()
+        # self.q.driver.find_element_by_link_text("DB Info").click()
         textbox = self.q.driver.find_element_by_id(
             "content_form:uiCodeCollection:input:input")
         textbox.send_keys(self.code_range)

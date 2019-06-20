@@ -151,6 +151,17 @@ class Queryer(object):
         else:
             self._structure_source = structure_source.upper()[0]
 
+    def enable_download_in_headless_chrome(self, browser, download_dir):
+        # print("DL LINK: {}".format(download_dir))
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir)
+
+        browser.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
+        browser.execute("send_command", params)
+        # return(browser)
+
     def _initialize_driver(self):
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
         if os.path.exists(browser_data_dir):
@@ -167,6 +178,9 @@ class Queryer(object):
         # start: exited normally"
         ##_options.add_argument('--no-startup-window ')
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
+        _options.add_argument('--headless')
+        _options.add_argument("--disable-gpu")
+        _options.add_argument("--no-sandbox")
 
         prefs = {
             'download.default_directory': self.download_dir,
@@ -207,6 +221,8 @@ class Queryer(object):
 
         return(webdriver.Chrome(options=_options))
 
+        # return()
+
     def _check_basic_search(self):
         """
         Use By.ID to locate the Search Panel header element; if 'Basic Search'
@@ -214,8 +230,6 @@ class Queryer(object):
         """
         header_id = 'content_form:mainSearchPanel_header'
 
-        source = self.driver.page_source
-        print(source)
         try:
             header = self.driver.find_element_by_id(header_id)
         except:
@@ -427,11 +441,14 @@ class Queryer(object):
         Use By.CLASS_NAME to locate 'display_main' elements, split the element text
         with 'Detailed View' in it and return(the last item in )the list.
         """
-        titles = self.driver.find_elements_by_id('display_main')
-        for title in titles:
-            if 'Detailed View' in title.text:
-                n_entries_loaded = int(title.text.split()[5])
-                return(n_entries_loaded)
+        for i in range(10):
+            titles = self.driver.find_elements_by_id('display_main')
+            for title in titles:
+                if 'Detailed View' in title.text:
+                    n_entries_loaded = int(title.text.split()[5])
+                    return(n_entries_loaded)
+
+            time.sleep(1)
 
     def parse_entries(self):
         """
@@ -447,9 +464,10 @@ class Queryer(object):
 
         Return: (list) A list of ICSD Collection Codes of entries parsed
         """
-        if self._get_number_of_entries_loaded() != self.hits:
+        hit_number = self._get_number_of_entries_loaded()
+        if hit_number != self.hits:
             self.quit()
-            error_message = '# Hits != # Entries in Detailed View'
+            error_message = '# Hits ({0}) != # Entries: ({1}) in Detailed View'.format(hit_number, self.hits)
             raise QueryerError(error_message)
 
         sys.stdout.write('Parsing all the entries... \n')
@@ -475,6 +493,7 @@ class Queryer(object):
                 screenshot_file = os.path.join(coll_code, 'screenshot.png')
                 self.save_screenshot(fname=screenshot_file)
 
+            self.enable_download_in_headless_chrome(self.driver, self.download_dir)
             # get the CIF file
             self.export_CIF()
             # uncomment the next few lines for automatic copying of CIF files
