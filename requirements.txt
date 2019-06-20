@@ -5,3 +5,4 @@ selenium
 PyVirtualDisplay
 beautifulsoup4
 pandas
+lxml
