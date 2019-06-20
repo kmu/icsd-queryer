@@ -152,6 +152,10 @@ class Queryer(object):
             self._structure_source = structure_source.upper()[0]
 
     def enable_download_in_headless_chrome(self, browser, download_dir):
+        # print("DL LINK: {}".format(download_dir))
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir)
+
         browser.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
 
         params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
@@ -159,8 +163,6 @@ class Queryer(object):
         # return(browser)
 
     def _initialize_driver(self):
-
-
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
         if os.path.exists(browser_data_dir):
             shutil.rmtree(browser_data_dir, ignore_errors=True)
