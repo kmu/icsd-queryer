@@ -104,6 +104,11 @@ class Queryer(object):
 
         self.page_obatained = False
 
+        self.init_interval()
+
+    def init_interval(self):
+        self.interval = 3  # sec
+
     @property
     def url(self):
         return(self._url)
@@ -559,7 +564,7 @@ class Queryer(object):
         """
         self._wait_until_dialogue_disappears()
         self.wait_for_ajax()
-        time.sleep(3)
+        time.sleep(self.interval)
         parsed_data = {}
         parsed_data['collection_code'] = self.get_collection_code()
         for tag in ICSD_PARSE_TAGS.keys():
