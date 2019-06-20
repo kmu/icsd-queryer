@@ -69,6 +69,7 @@ class Crawler(object):
 
         while len(self.not_yet_crawled) > 0:
             try:
+                self.refresh()
                 start, end = self.get_code_range()
 
                 ae = AllEntries(start, end)
