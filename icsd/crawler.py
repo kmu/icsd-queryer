@@ -65,6 +65,7 @@ class Crawler(object):
         self.refresh()
 
         sleep_time = 180
+        n_at_fail = 0
 
         while len(self.not_yet_crawled) > 0:
             try:
@@ -81,7 +82,7 @@ class Crawler(object):
 
                 self.refresh()
 
-                if len(self.not_yet_crawled) - n_at_fail > 1000:
+                if n_at_fail - len(self.not_yet_crawled) > 1000:
                     sleep_time = 180
 
                 n_at_fail = len(self.not_yet_crawled)
