@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    version='0.0.2',
+    version='0.0.3',
     name='icsd',
     install_requires=["PyYAML","beautifulsoup4", "selenium", "PyVirtualDisplay", "pandas", "tqdm"],
     entry_points={
