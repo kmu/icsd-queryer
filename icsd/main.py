@@ -51,14 +51,14 @@ def main():
 
     # parser_ls = subparsers.add_parser(
     #     'ls', help='report already retrieved entries')
-    parser_ls.add_argument(
-        '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
+    # parser_ls.add_argument(
+        # '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
 
     # parser_ls = subparsers.add_parser(
     #     'coverage', help='show coverge of your database')
-    parser_ls.add_argument(
-        '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
-    parser_ls.set_defaults(handler=command_ls)
+    # parser_ls.add_argument(
+        # '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
+    # parser_ls.set_defaults(handler=command_ls)
 
     args = parser.parse_args()
     print(args)
