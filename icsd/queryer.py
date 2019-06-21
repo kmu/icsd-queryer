@@ -8,14 +8,12 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 import pkg_resources
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
-
 from selenium.webdriver.chrome.options import Options
 
 
@@ -595,7 +593,8 @@ class Queryer(object):
 
         parsed_data['ICSD_version'] = self._get_icsd_ver()
         parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
-        parsed_data['crawler_version'] = pkg_resources.get_distribution("icsd").version
+        parsed_data['crawler_version'] = pkg_resources.get_distribution(
+            "icsd").version
 
         return(parsed_data)
 
