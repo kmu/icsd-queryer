@@ -19,7 +19,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
 
-pd.options.display.max_colwidth = 1000
+pd.options.display.max_colwidth = 100000
 
 
 class QueryerError(Exception):
@@ -108,7 +108,7 @@ class Queryer(object):
         self.init_interval()
 
     def init_interval(self):
-        self.interval = 0  # sec
+        self.interval = 2  # sec
 
     @property
     def url(self):
@@ -158,7 +158,6 @@ class Queryer(object):
             self._structure_source = structure_source.upper()[0]
 
     def enable_download_in_headless_chrome(self, browser, download_dir):
-        # print("DL LINK: {}".format(download_dir))
         if not os.path.exists(download_dir):
             os.makedirs(download_dir)
 
@@ -168,7 +167,6 @@ class Queryer(object):
         params = {'cmd': 'Page.setDownloadBehavior', 'params': {
             'behavior': 'allow', 'downloadPath': download_dir}}
         browser.execute("send_command", params)
-        # return(browser)
 
     def _initialize_driver(self):
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
