@@ -620,8 +620,9 @@ class Queryer(object):
                 if 'Summary' in title.text:
                     # try:
                     if len(title.text.split()) > 21:
-                        collection_code = int(title.text.split()[21])
-                        return(collection_code)
+                        code = title.text.split()[21]
+                        if code.isdigit():
+                            return(int(code))
                         # break
                     # except Exception as e:
 
