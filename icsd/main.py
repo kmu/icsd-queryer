@@ -5,6 +5,7 @@ from sys import argv
 import sys
 from icsd.queryer import Queryer
 
+
 def command_scrape(args):
     if args.all:
         scrape_all()
@@ -30,6 +31,7 @@ def command_enumerate(args):
 # def command_ls():
 #     pass
 
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -52,12 +54,12 @@ def main():
     # parser_ls = subparsers.add_parser(
     #     'ls', help='report already retrieved entries')
     # parser_ls.add_argument(
-        # '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
+    # '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
 
     # parser_ls = subparsers.add_parser(
     #     'coverage', help='show coverge of your database')
     # parser_ls.add_argument(
-        # '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
+    # '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
     # parser_ls.set_defaults(handler=command_ls)
 
     args = parser.parse_args()
@@ -74,4 +76,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -17,10 +17,12 @@ class AllEntries():
         self.cc.q._click_show_detailed_view()
         self.cc.q.parse_entries()
 
+
 def main():
     for i in range(1000):
         ae = AllEntries(i*1000, i*1000+999)
         ae.run()
+
 
 if __name__ == '__main__':
     main()

@@ -69,7 +69,6 @@ class CollectionCoder():
 
         combined_df.to_csv(self.combined_csv_path)
 
-
     def _get_df(self):
         _df = self._get_current_df()
         while self.previous_code == _df['Coll. Code'].min():
@@ -89,6 +88,7 @@ class CollectionCoder():
     def quit(self):
         self.q.quit()
 
+
 def main():
     for i in tqdm(range(100)):
         try:
@@ -99,7 +99,6 @@ def main():
         except queryer.QueryerError:
             with open(cc.combined_csv_path, "w") as f:
                 f.write("")
-
 
             print("No entry found in this step")
             cc.quit()
