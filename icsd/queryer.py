@@ -556,6 +556,7 @@ class Queryer(object):
         element = self.driver.find_element_by_xpath(
             "//button[@id='display_form:buttonNext']/span")
         self.driver.execute_script("arguments[0].click();", element)
+        self.page_obatained = False
 
     def parse_entry(self):
         """
