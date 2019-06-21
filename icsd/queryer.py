@@ -624,6 +624,7 @@ class Queryer(object):
 
                     error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
                         str(e)
+                    print(error_message)
                     print("title text:")
                     print(title.text)
                     raise QueryerError(error_message)
