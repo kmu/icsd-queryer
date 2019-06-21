@@ -288,7 +288,7 @@ class Queryer(object):
         self._wait_until_dialogue_disappears()
 
     def _wait_until_dialogue_disappears(self):
-        while True:
+        for _ in range(1000):
             element = self.driver.find_element_by_id("dlgBlockUI")
             is_hidden = element.get_attribute("aria-hidden")
             time.sleep(0.1)
@@ -403,7 +403,7 @@ class Queryer(object):
         time.sleep(3)
         self._expand_all()
 
-        while True:
+        for _ in range(1000):
             time.sleep(0.1)
             folded_elements = self.driver.find_elements_by_xpath(
                 '//*[@class="ui-accordion-header '
@@ -513,7 +513,8 @@ class Queryer(object):
             # wait for the file download to be completed
             CIF_name = 'ICSD_CollCode{}.cif'.format(coll_code)
             CIF_source_loc = os.path.join(self.download_dir, CIF_name)
-            while True:
+
+            for _ in range(1000):
                 if os.path.exists(CIF_source_loc):
                     time.sleep(0.1)
                     break
