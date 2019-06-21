@@ -161,9 +161,11 @@ class Queryer(object):
         if not os.path.exists(download_dir):
             os.makedirs(download_dir)
 
-        browser.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+        browser.command_executor._commands["send_command"] = (
+            "POST", '/session/$sessionId/chromium/send_command')
 
-        params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {
+            'behavior': 'allow', 'downloadPath': download_dir}}
         browser.execute("send_command", params)
         # return(browser)
 
@@ -197,14 +199,17 @@ class Queryer(object):
             _options.binary_location = os.environ['CHROME']
             _options.add_argument('--headless')
 
-
-            _options.add_argument("start-maximized")#// open Browser in maximized mode
-            _options.add_argument("disable-infobars")#// disabling infobars
-            _options.add_argument("--disable-extensions")#// disabling extensions
-            _options.add_argument("--disable-gpu")#// applicable to windows os only
-            _options.add_argument("--disable-dev-shm-usage")#// overcome limited resource problems
-            _options.add_argument("--no-sandbox")#// Bypass OS security model
-
+            # // open Browser in maximized mode
+            _options.add_argument("start-maximized")
+            _options.add_argument("disable-infobars")  # // disabling infobars
+            # // disabling extensions
+            _options.add_argument("--disable-extensions")
+            # // applicable to windows os only
+            _options.add_argument("--disable-gpu")
+            # // overcome limited resource problems
+            _options.add_argument("--disable-dev-shm-usage")
+            # // Bypass OS security model
+            _options.add_argument("--no-sandbox")
 
             _options.add_argument("--window-size=1920,1080")
             _options.add_argument("--disable-gpu")
@@ -222,7 +227,7 @@ class Queryer(object):
             _options.add_argument("--ignore-certificate-errors")
             _options.add_argument("--start-maximized")
 
-            return(webdriver.Chrome(os.environ['CDRIVER'],options=_options))
+            return(webdriver.Chrome(os.environ['CDRIVER'], options=_options))
 
         return(webdriver.Chrome(options=_options))
 
@@ -472,7 +477,8 @@ class Queryer(object):
         hit_number = self._get_number_of_entries_loaded()
         if hit_number != self.hits:
             self.quit()
-            error_message = '# Hits ({0}) != # Entries: ({1}) in Detailed View'.format(hit_number, self.hits)
+            error_message = '# Hits ({0}) != # Entries: ({1}) in Detailed View'.format(
+                hit_number, self.hits)
             raise QueryerError(error_message)
 
         sys.stdout.write('Parsing all the entries... \n')
@@ -498,7 +504,8 @@ class Queryer(object):
                 screenshot_file = os.path.join(coll_code, 'screenshot.png')
                 self.save_screenshot(fname=screenshot_file)
 
-            self.enable_download_in_headless_chrome(self.driver, self.download_dir)
+            self.enable_download_in_headless_chrome(
+                self.driver, self.download_dir)
             # get the CIF file
             self.export_CIF()
             # uncomment the next few lines for automatic copying of CIF files
@@ -538,7 +545,6 @@ class Queryer(object):
 
         with open("{}/source.html".format(coll_code), "w") as f:
             f.write(source)
-
 
     def _go_to_next_entry(self):
         """
@@ -625,7 +631,6 @@ class Queryer(object):
                             return(int(code))
                         # break
                     # except Exception as e:
-
 
                         # error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
                         #     str(e)
