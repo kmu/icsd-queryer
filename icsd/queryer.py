@@ -107,7 +107,7 @@ class Queryer(object):
         self.init_interval()
 
     def init_interval(self):
-        self.interval = 0.1  # sec
+        self.interval = 0  # sec
 
     @property
     def url(self):
