@@ -606,28 +606,42 @@ class Queryer(object):
 
         Return: (integer) ICSD Collection Code
         """
-        self.wait_for_ajax()
-        self._wait_until_dialogue_disappears()
 
-        titles = WebDriverWait(self.driver, 20).until(
-            ec.presence_of_all_elements_located((
-                By.ID, "display_main"
-            )))
+        for _ in range(1000):
+            self.wait_for_ajax()
+            self._wait_until_dialogue_disappears()
 
-        for title in titles:
-            if 'Summary' in title.text:
-                try:
-                    collection_code = int(title.text.split()[21])
-                    break
-                except Exception as e:
-                    self.quit()
+            titles = WebDriverWait(self.driver, 20).until(
+                ec.presence_of_all_elements_located((
+                    By.ID, "display_main"
+                )))
 
-                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
-                        str(e)
-                    print("title text:")
-                    print(title.text)
-                    raise QueryerError(error_message)
-        return(collection_code)
+            for title in titles:
+                if 'Summary' in title.text:
+                    # try:
+                    if len(title.text.split()) > 21:
+                        code = title.text.split()[21]
+                        if code.isdigit():
+                            return(int(code))
+                        # break
+                    # except Exception as e:
+
+
+                        # error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
+                        #     str(e)
+                        # print(error_message)
+                        # print("title text:")
+                        # print(title.text)
+                        # raise QueryerError(error_message)
+
+                # return(collection_code)
+
+            time.sleep(0.1)
+
+        error_message = 'Failed to parse the ICSD Collection Code.'
+        print(error_message)
+        self.quit()
+        raise QueryerError(error_message)
 
     def get_html_table(self, idx):
         if not self.page_obatained:
