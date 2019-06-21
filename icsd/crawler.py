@@ -81,7 +81,7 @@ class Crawler(object):
                 time.sleep(sleep_time)
                 sleep_time = sleep_time * 2
 
-                ae.cc.q.interval = ae.cc.q.interval * 2
+                ae.cc.q.interval += 1
 
                 self.refresh()
 
