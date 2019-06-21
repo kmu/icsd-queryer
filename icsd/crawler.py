@@ -10,7 +10,6 @@ import time
 
 class Crawler(object):
     def __init__(self):
-        # logging = getLogger("Log")
         logging.basicConfig(filename = "selenium.log",  level = logging.INFO,
                                format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
 

@@ -27,9 +27,8 @@ def command_scrape(args):
 def command_enumerate(args):
     enumerate_all()
 
-
-def command_ls():
-    pass
+# def command_ls():
+#     pass
 
 def main():
     parser = argparse.ArgumentParser()
@@ -50,22 +49,20 @@ def main():
         'enumerate', help='make list of all ICSD codes')
     parser_enumerate.set_defaults(handler=command_enumerate)
 
-    parser_ls = subparsers.add_parser(
-        'ls', help='report already retrieved entries')
+    # parser_ls = subparsers.add_parser(
+    #     'ls', help='report already retrieved entries')
     parser_ls.add_argument(
         '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
 
-    parser_ls = subparsers.add_parser(
-        'coverage', help='show coverge of your database')
+    # parser_ls = subparsers.add_parser(
+    #     'coverage', help='show coverge of your database')
     parser_ls.add_argument(
         '--code', help='ICSD Collection Code (e.g. 2000, 2000-2050)', default="", type=str)
     parser_ls.set_defaults(handler=command_ls)
 
     args = parser.parse_args()
     print(args)
-    # self.arg_parser.parse_args(args=argv[1:])
-      #  args = self.arg_parser.parse_args(args=argv[1:])
-    #
+
     try:
         getattr(args, "handler")
     except AttributeError:
