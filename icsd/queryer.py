@@ -7,6 +7,7 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import pkg_resources
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -596,6 +597,7 @@ class Queryer(object):
 
         parsed_data['ICSD_version'] = self._get_icsd_ver()
         parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
+        parsed_data['crawler_version'] = pkg_resources.get_distribution("icsd").version
 
         return(parsed_data)
 
