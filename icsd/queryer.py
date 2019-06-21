@@ -1,4 +1,5 @@
 import sys
+import platform
 import os
 import shutil
 import json
@@ -6,6 +7,7 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import pkg_resources
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -13,6 +15,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+
+from selenium.webdriver.chrome.options import Options
 
 
 pd.options.display.max_colwidth = 1000
@@ -101,6 +105,11 @@ class Queryer(object):
 
         self.page_obatained = False
 
+        self.init_interval()
+
+    def init_interval(self):
+        self.interval = 0  # sec
+
     @property
     def url(self):
         return(self._url)
@@ -148,6 +157,19 @@ class Queryer(object):
         else:
             self._structure_source = structure_source.upper()[0]
 
+    def enable_download_in_headless_chrome(self, browser, download_dir):
+        # print("DL LINK: {}".format(download_dir))
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir)
+
+        browser.command_executor._commands["send_command"] = (
+            "POST", '/session/$sessionId/chromium/send_command')
+
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {
+            'behavior': 'allow', 'downloadPath': download_dir}}
+        browser.execute("send_command", params)
+        # return(browser)
+
     def _initialize_driver(self):
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
         if os.path.exists(browser_data_dir):
@@ -164,12 +186,53 @@ class Queryer(object):
         # start: exited normally"
         ##_options.add_argument('--no-startup-window ')
         _options.add_argument('user-data-dir={}'.format(browser_data_dir))
+        _options.add_argument('--headless')
+        _options.add_argument("--disable-gpu")
+        _options.add_argument("--no-sandbox")
+
         prefs = {
             'download.default_directory': self.download_dir,
             'profile.default_content_setting_values.automatic_downloads': 1
         }
         _options.add_experimental_option("prefs", prefs)
-        return(webdriver.Chrome(chrome_options=_options))
+
+        if platform.system() == "Linux":
+            _options.binary_location = os.environ['CHROME']
+            _options.add_argument('--headless')
+
+            # // open Browser in maximized mode
+            _options.add_argument("start-maximized")
+            _options.add_argument("disable-infobars")  # // disabling infobars
+            # // disabling extensions
+            _options.add_argument("--disable-extensions")
+            # // applicable to windows os only
+            _options.add_argument("--disable-gpu")
+            # // overcome limited resource problems
+            _options.add_argument("--disable-dev-shm-usage")
+            # // Bypass OS security model
+            _options.add_argument("--no-sandbox")
+
+            _options.add_argument("--window-size=1920,1080")
+            _options.add_argument("--disable-gpu")
+            _options.add_argument("--disable-extensions")
+            _options.add_experimental_option("useAutomationExtension", False)
+            _options.add_argument("--proxy-server='direct://'")
+            _options.add_argument("--proxy-bypass-list=*")
+            _options.add_argument("--start-maximized")
+
+            _options.add_argument("--headless")
+            _options.add_argument("--test-type")
+            _options.add_argument("--disable-gpu")
+            _options.add_argument("--no-first-run")
+            _options.add_argument("--no-default-browser-check")
+            _options.add_argument("--ignore-certificate-errors")
+            _options.add_argument("--start-maximized")
+
+            return(webdriver.Chrome(os.environ['CDRIVER'], options=_options))
+
+        return(webdriver.Chrome(options=_options))
+
+        # return()
 
     def _check_basic_search(self):
         """
@@ -177,6 +240,7 @@ class Queryer(object):
         is not in the element text, raise Error.
         """
         header_id = 'content_form:mainSearchPanel_header'
+
         try:
             header = self.driver.find_element_by_id(header_id)
         except:
@@ -225,7 +289,7 @@ class Queryer(object):
         self._wait_until_dialogue_disappears()
 
     def _wait_until_dialogue_disappears(self):
-        while True:
+        for _ in range(1000):
             element = self.driver.find_element_by_id("dlgBlockUI")
             is_hidden = element.get_attribute("aria-hidden")
             time.sleep(0.1)
@@ -340,7 +404,7 @@ class Queryer(object):
         time.sleep(3)
         self._expand_all()
 
-        while True:
+        for _ in range(1000):
             time.sleep(0.1)
             folded_elements = self.driver.find_elements_by_xpath(
                 '//*[@class="ui-accordion-header '
@@ -388,11 +452,14 @@ class Queryer(object):
         Use By.CLASS_NAME to locate 'display_main' elements, split the element text
         with 'Detailed View' in it and return(the last item in )the list.
         """
-        titles = self.driver.find_elements_by_id('display_main')
-        for title in titles:
-            if 'Detailed View' in title.text:
-                n_entries_loaded = int(title.text.split()[5])
-                return(n_entries_loaded)
+        for i in range(10):
+            titles = self.driver.find_elements_by_id('display_main')
+            for title in titles:
+                if 'Detailed View' in title.text:
+                    n_entries_loaded = int(title.text.split()[5])
+                    return(n_entries_loaded)
+
+            time.sleep(1)
 
     def parse_entries(self):
         """
@@ -408,9 +475,11 @@ class Queryer(object):
 
         Return: (list) A list of ICSD Collection Codes of entries parsed
         """
-        if self._get_number_of_entries_loaded() != self.hits:
+        hit_number = self._get_number_of_entries_loaded()
+        if hit_number != self.hits:
             self.quit()
-            error_message = '# Hits != # Entries in Detailed View'
+            error_message = '# Hits ({0}) != # Entries: ({1}) in Detailed View'.format(
+                hit_number, self.hits)
             raise QueryerError(error_message)
 
         sys.stdout.write('Parsing all the entries... \n')
@@ -436,6 +505,8 @@ class Queryer(object):
                 screenshot_file = os.path.join(coll_code, 'screenshot.png')
                 self.save_screenshot(fname=screenshot_file)
 
+            self.enable_download_in_headless_chrome(
+                self.driver, self.download_dir)
             # get the CIF file
             self.export_CIF()
             # uncomment the next few lines for automatic copying of CIF files
@@ -443,7 +514,8 @@ class Queryer(object):
             # wait for the file download to be completed
             CIF_name = 'ICSD_CollCode{}.cif'.format(coll_code)
             CIF_source_loc = os.path.join(self.download_dir, CIF_name)
-            while True:
+
+            for _ in range(1000):
                 if os.path.exists(CIF_source_loc):
                     time.sleep(0.1)
                     break
@@ -476,7 +548,6 @@ class Queryer(object):
         with open("{}/source.html".format(coll_code), "w") as f:
             f.write(source)
 
-
     def _go_to_next_entry(self):
         """
         Use By.CLASS_NAME to locate the 'Next' button ('button_vcr_next'), and
@@ -486,6 +557,7 @@ class Queryer(object):
         element = self.driver.find_element_by_xpath(
             "//button[@id='display_form:buttonNext']/span")
         self.driver.execute_script("arguments[0].click();", element)
+        self.page_obatained = False
 
     def parse_entry(self):
         """
@@ -501,7 +573,7 @@ class Queryer(object):
         """
         self._wait_until_dialogue_disappears()
         self.wait_for_ajax()
-        time.sleep(3)
+        time.sleep(self.interval)
         parsed_data = {}
         parsed_data['collection_code'] = self.get_collection_code()
         for tag in ICSD_PARSE_TAGS.keys():
@@ -525,6 +597,7 @@ class Queryer(object):
 
         parsed_data['ICSD_version'] = self._get_icsd_ver()
         parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
+        parsed_data['crawler_version'] = pkg_resources.get_distribution("icsd").version
 
         return(parsed_data)
 
@@ -543,28 +616,41 @@ class Queryer(object):
 
         Return: (integer) ICSD Collection Code
         """
-        self.wait_for_ajax()
-        self._wait_until_dialogue_disappears()
 
-        titles = WebDriverWait(self.driver, 20).until(
-            ec.presence_of_all_elements_located((
-                By.ID, "display_main"
-            )))
+        for _ in range(1000):
+            self.wait_for_ajax()
+            self._wait_until_dialogue_disappears()
 
-        for title in titles:
-            if 'Summary' in title.text:
-                try:
-                    collection_code = int(title.text.split()[21])
-                    break
-                except Exception as e:
-                    self.quit()
+            titles = WebDriverWait(self.driver, 20).until(
+                ec.presence_of_all_elements_located((
+                    By.ID, "display_main"
+                )))
 
-                    error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
-                        str(e)
-                    print("title text:")
-                    print(title.text)
-                    raise QueryerError(error_message)
-        return(collection_code)
+            for title in titles:
+                if 'Summary' in title.text:
+                    # try:
+                    if len(title.text.split()) > 21:
+                        code = title.text.split()[21]
+                        if code.isdigit():
+                            return(int(code))
+                        # break
+                    # except Exception as e:
+
+                        # error_message = 'Failed to parse the ICSD Collection Code. Original error:\n' + \
+                        #     str(e)
+                        # print(error_message)
+                        # print("title text:")
+                        # print(title.text)
+                        # raise QueryerError(error_message)
+
+                # return(collection_code)
+
+            time.sleep(0.1)
+
+        error_message = 'Failed to parse the ICSD Collection Code.'
+        print(error_message)
+        self.quit()
+        raise QueryerError(error_message)
 
     def get_html_table(self, idx):
         if not self.page_obatained:

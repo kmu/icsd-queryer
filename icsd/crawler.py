@@ -64,18 +64,32 @@ class Crawler(object):
         logging.info("Awakening...")
         self.refresh()
 
+        sleep_time = 10
+        n_at_fail = 0
+
         while len(self.not_yet_crawled) > 0:
             try:
+                self.refresh()
                 start, end = self.get_code_range()
 
                 ae = AllEntries(start, end)
                 ae.run()
 
-                self.refresh()
             except Exception as e:
                 logging.error(e)
-                time.sleep(180)
+                print("Sleep {} seconds".format(sleep_time))
+                time.sleep(sleep_time)
+                sleep_time = sleep_time * 2
 
+                ae.cc.q.interval += 1
+
+                self.refresh()
+
+                if n_at_fail - len(self.not_yet_crawled) > 1000:
+                    sleep_time = 10
+                    ae.cc.q.init_interval()
+
+                n_at_fail = len(self.not_yet_crawled)
 
 
 def main():
