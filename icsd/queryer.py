@@ -19,7 +19,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 
 
-pd.options.display.max_colwidth = 1000
+pd.options.display.max_colwidth = 100000
 
 
 class QueryerError(Exception):
