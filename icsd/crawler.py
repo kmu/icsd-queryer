@@ -3,16 +3,14 @@ import pandas as pd
 import os
 import math
 from icsd.all_entries import AllEntries
-# from logging import getLogger
 import logging
 import time
 
 
 class Crawler(object):
     def __init__(self):
-        # logging = getLogger("Log")
-        logging.basicConfig(filename = "selenium.log",  level = logging.INFO,
-                               format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
+        logging.basicConfig(filename="selenium.log",  level=logging.INFO,
+                            format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
 
     def get_code_range(self):
         def get_within_value(start, end):
@@ -23,7 +21,8 @@ class Crawler(object):
             return(-1)
 
         start = self.not_yet_crawled[0]
-        end = self.all_codes[self.all_codes.index(start) + 99]  # 100 is the maximum of DL
+        end = self.all_codes[self.all_codes.index(
+            start) + 99]  # 100 is the maximum of DL
 
         within_val = get_within_value(start, end)
 
@@ -46,7 +45,8 @@ class Crawler(object):
 
         assert(cdf["Coll. Code"].duplicated() == True).sum() == 0
 
-        logging.info("{} structures are in Collection Code list".format(len(cdf)))
+        logging.info(
+            "{} structures are in Collection Code list".format(len(cdf)))
 
         cdf = cdf.sort_values(by=["Coll. Code"])
 

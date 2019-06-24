@@ -8,14 +8,12 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 import pkg_resources
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from tags import ICSD_QUERY_TAGS, ICSD_PARSE_TAGS
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
-
 from selenium.webdriver.chrome.options import Options
 
 
@@ -108,7 +106,7 @@ class Queryer(object):
         self.init_interval()
 
     def init_interval(self):
-        self.interval = 0  # sec
+        self.interval = 2  # sec
 
     @property
     def url(self):
@@ -158,7 +156,6 @@ class Queryer(object):
             self._structure_source = structure_source.upper()[0]
 
     def enable_download_in_headless_chrome(self, browser, download_dir):
-        # print("DL LINK: {}".format(download_dir))
         if not os.path.exists(download_dir):
             os.makedirs(download_dir)
 
@@ -168,7 +165,6 @@ class Queryer(object):
         params = {'cmd': 'Page.setDownloadBehavior', 'params': {
             'behavior': 'allow', 'downloadPath': download_dir}}
         browser.execute("send_command", params)
-        # return(browser)
 
     def _initialize_driver(self):
         browser_data_dir = os.path.join(os.getcwd(), 'browser_data')
@@ -597,7 +593,8 @@ class Queryer(object):
 
         parsed_data['ICSD_version'] = self._get_icsd_ver()
         parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
-        parsed_data['crawler_version'] = pkg_resources.get_distribution("icsd").version
+        parsed_data['crawler_version'] = pkg_resources.get_distribution(
+            "icsd").version
 
         return(parsed_data)
 
