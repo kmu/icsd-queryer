@@ -9,6 +9,7 @@ import time
 
 class Crawler(object):
     def __init__(self):
+        self.max_dl = 100
         logging.basicConfig(filename="selenium.log",  level=logging.INFO,
                             format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
 
@@ -22,7 +23,7 @@ class Crawler(object):
 
         start = self.not_yet_crawled[0]
         end = self.all_codes[self.all_codes.index(
-            start) + 99]  # 100 is the maximum of DL
+            start) + self.max_dl-1]  # 100 is the maximum of DL
 
         within_val = get_within_value(start, end)
 
@@ -81,6 +82,8 @@ class Crawler(object):
                 time.sleep(sleep_time)
                 sleep_time = sleep_time * 2
                 ae.cc.q.interval = ae.cc.q.interval * 2
+
+                self.max_dl = int(self.max_dl / 2)
 
                 self.refresh()
 
