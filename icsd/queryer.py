@@ -81,6 +81,8 @@ class Queryer(object):
         self._url = None
         self.url = url
 
+        self.skipcif = False
+
         self._query = None
         self.query = query
         sys.stdout.write('Initializing a WebDriver...\n')

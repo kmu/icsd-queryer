@@ -8,7 +8,7 @@ from icsd.queryer import Queryer
 
 def command_scrape(args):
     if args.all:
-        scrape_all()
+        scrape_all(args.skipcif)
 
     if args.code > 0:
         query = {
@@ -39,6 +39,8 @@ def main():
     parser_scrape = subparsers.add_parser('scrape', help='scrape ICSD')
     parser_scrape.add_argument('-A', '--all', action='store_true',
                                help='scrape everything using ICSD Collection Code')
+    parser_scrape.add_argument('--skipcif', action='store_true',
+                               help='Do not download CIF')
     parser_scrape.add_argument(
         '--composition', help='scrape everything using ICSD Collection Code', default="", type=str)
     parser_scrape.add_argument(
