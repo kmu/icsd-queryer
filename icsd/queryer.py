@@ -503,25 +503,26 @@ class Queryer(object):
                 screenshot_file = os.path.join(coll_code, 'screenshot.png')
                 self.save_screenshot(fname=screenshot_file)
 
-            self.enable_download_in_headless_chrome(
-                self.driver, self.download_dir)
-            # get the CIF file
-            self.export_CIF()
-            # uncomment the next few lines for automatic copying of CIF files
-            # into the correct folders
-            # wait for the file download to be completed
-            CIF_name = 'ICSD_CollCode{}.cif'.format(coll_code)
-            CIF_source_loc = os.path.join(self.download_dir, CIF_name)
+            if self.skipcif == False:
+                self.enable_download_in_headless_chrome(
+                    self.driver, self.download_dir)
+                # get the CIF file
+                self.export_CIF()
+                # uncomment the next few lines for automatic copying of CIF files
+                # into the correct folders
+                # wait for the file download to be completed
+                CIF_name = 'ICSD_CollCode{}.cif'.format(coll_code)
+                CIF_source_loc = os.path.join(self.download_dir, CIF_name)
 
-            for _ in range(1000):
-                if os.path.exists(CIF_source_loc):
-                    time.sleep(0.1)
-                    break
-                else:
-                    time.sleep(0.1)
-            # move it into the directory of the current entry
-            CIF_dest_loc = os.path.join(coll_code, '{}.cif'.format(coll_code))
-            shutil.move(CIF_source_loc, CIF_dest_loc)
+                for _ in range(1000):
+                    if os.path.exists(CIF_source_loc):
+                        time.sleep(0.1)
+                        break
+                    else:
+                        time.sleep(0.1)
+                # move it into the directory of the current entry
+                CIF_dest_loc = os.path.join(coll_code, '{}.cif'.format(coll_code))
+                shutil.move(CIF_source_loc, CIF_dest_loc)
 
             sys.stdout.write('[{}/{}]: '.format(i+1, self.hits))
             sys.stdout.write('Data exported into ')
