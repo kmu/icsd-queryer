@@ -10,6 +10,7 @@ import time
 class Crawler(object):
     def __init__(self):
         self.max_dl = 100
+        self.skipcif = False
         logging.basicConfig(filename="selenium.log",  level=logging.INFO,
                             format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
 
@@ -74,6 +75,7 @@ class Crawler(object):
                 start, end = self.get_code_range()
 
                 ae = AllEntries(start, end)
+                ae.cc.q.skipcif = self.skipcif
                 ae.run()
 
             except Exception as e:
@@ -94,6 +96,7 @@ class Crawler(object):
                 # n_at_fail = len(self.not_yet_crawled)
 
 
-def main():
+def main(skipcif=False):
     c = Crawler()
+    c.skipcif = skipcif
     c.run()
