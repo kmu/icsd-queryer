@@ -15,6 +15,7 @@ def command_scrape(args):
             "icsd_collection_code": args.code,
         }
         queryer = Queryer(query=query, structure_source=args.source)
+        queryer.skipcif = args.skipcif
         queryer.perform_icsd_query()
 
     if args.composition != "":
