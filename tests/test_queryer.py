@@ -9,12 +9,35 @@ import unittest
 
 
 is_mac = platform.system() == 'Darwin'
+is_mac = False
 
 
 class TestQueryer(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
+
+    def test_cell_parameters(self):
+
+        cell_str2 = "3.792 (5) 3.792 (5) 3.792 (5) 90. 90. 90."
+        d2 = Queryer.parse_cell_parameters(Queryer, cell_str2)
+        self.assertAlmostEqual(d2['a'], 3.792)
+        self.assertAlmostEqual(d2['b'], 3.792)
+        self.assertAlmostEqual(d2['c'], 3.792)
+        self.assertAlmostEqual(d2['alpha'], 90.0)
+        self.assertAlmostEqual(d2['beta'], 90.0)
+        self.assertAlmostEqual(d2['gamma'], 90.0)
+
+
+        cell_str1 = '6.103(1) 12.566(3) 26.031(1) 90. 90. 90.'
+        d1 = Queryer.parse_cell_parameters(Queryer, cell_str1)
+        print(d1)
+        self.assertAlmostEqual(d1['a'], 6.103)
+        self.assertAlmostEqual(d1['b'], 12.566)
+        self.assertAlmostEqual(d1['c'], 26.031)
+        self.assertAlmostEqual(d1['alpha'], 90.0)
+        self.assertAlmostEqual(d1['beta'], 90.0)
+        self.assertAlmostEqual(d1['gamma'], 90.0)
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_dummy_data(self):
