@@ -9,8 +9,6 @@ import unittest
 
 
 is_mac = platform.system() == 'Darwin'
-is_mac = False
-
 
 class TestQueryer(unittest.TestCase):
 
