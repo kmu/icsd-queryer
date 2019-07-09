@@ -788,6 +788,27 @@ class Queryer(object):
         formula = _df[_df.Name == 'AB formula'].Value.to_string(index=False)
         return(formula.strip())
 
+    def parse_cell_parameters(self, raw_text):
+        raw_text = raw_text.strip()
+        raw_text = raw_text.replace(" (", "(")
+
+        a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
+                                       in raw_text.split()]
+
+        assert a > 0
+        assert b > 0
+        assert c > 0
+        assert alpha > 0
+        assert beta > 0
+        assert gamma > 0
+        assert alpha < 180
+        assert beta < 180
+        assert gamma < 180
+
+        cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
+                           'gamma': gamma}
+        return(cell_parameters)
+
     # panel: "Published Crystal Structure Data"
     def get_cell_parameters(self):
         """
@@ -802,21 +823,7 @@ class Queryer(object):
         _df = self._get_published_crystal_structure_data_panel()
         raw_text = _df[_df.Name ==
                        'Cell parameter'].Value.to_string(index=False)
-        raw_text = raw_text.strip()
-
-        a, b, c, alpha, beta, gamma = [float(e.split('(')[0].strip('.')) for e
-                                       in raw_text.split()]
-        cell_parameters = {'a': a, 'b': b, 'c': c, 'alpha': alpha, 'beta': beta,
-                           'gamma': gamma}
-        assert a > 0
-        assert b > 0
-        assert c > 0
-        assert alpha > 0
-        assert beta > 0
-        assert gamma > 0
-        assert alpha < 180
-        assert beta < 180
-        assert gamma < 180
+        cell_parameters = self.parse_cell_parameters(raw_text)
         return(cell_parameters)
 
     def get_volume(self):
