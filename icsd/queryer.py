@@ -1111,7 +1111,11 @@ class Queryer(object):
 
         if raw_text == "Series([], )":
             return(None)
-        return(float(raw_text.strip()))
+
+        raw_text = raw_text.strip()
+        raw_text = raw_text.split("(")[0]
+
+        return(float(raw_text))
 
     # checkboxes
     def _is_checkbox_enabled(self, tag_key):
