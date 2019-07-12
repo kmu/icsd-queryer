@@ -40,12 +40,15 @@ def main():
     parser_scrape = subparsers.add_parser('scrape', help='scrape ICSD')
     parser_scrape.add_argument('-A', '--all', action='store_true',
                                help='scrape everything using ICSD Collection Code')
-    parser_scrape.add_argument('--skipcif', action='store_true',
-                               help='Do not download CIF')
     parser_scrape.add_argument(
-        '--composition', help='scrape everything using ICSD Collection Code', default="", type=str)
+        '--skipcif',
+        action='store_true',
+        help='Do not download CIF'
+    )
     parser_scrape.add_argument(
-        '--code', help='scape by ICSD Collection Code (e.g. 2000)', default=-1, type=int)
+        '--composition', help='e.g. Si:1 O:2', default="", type=str)
+    parser_scrape.add_argument(
+        '--code', help='scrape by ICSD Collection Code (e.g. 2000)', default=-1, type=int)
     parser_scrape.add_argument(
         '--source', help='structure source (E (experiment), T (theory), or A (all, default))', default="A", type=str)
     parser_scrape.set_defaults(handler=command_scrape)
