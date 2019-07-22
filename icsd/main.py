@@ -8,13 +8,14 @@ from icsd.queryer import Queryer
 
 def command_scrape(args):
     if args.all:
-        scrape_all()
+        scrape_all(args.skipcif)
 
     if args.code > 0:
         query = {
             "icsd_collection_code": args.code,
         }
         queryer = Queryer(query=query, structure_source=args.source)
+        queryer.skipcif = args.dlcif == False
         queryer.perform_icsd_query()
 
     if args.composition != "":
@@ -40,9 +41,14 @@ def main():
     parser_scrape.add_argument('-A', '--all', action='store_true',
                                help='scrape everything using ICSD Collection Code')
     parser_scrape.add_argument(
-        '--composition', help='scrape everything using ICSD Collection Code', default="", type=str)
+        '--dlcif',
+        action='store_true',
+        help='Download CIF'
+    )
     parser_scrape.add_argument(
-        '--code', help='scape by ICSD Collection Code (e.g. 2000)', default=-1, type=int)
+        '--composition', help='e.g. Si:1 O:2', default="", type=str)
+    parser_scrape.add_argument(
+        '--code', help='scrape by ICSD Collection Code (e.g. 2000)', default=-1, type=int)
     parser_scrape.add_argument(
         '--source', help='structure source (E (experiment), T (theory), or A (all, default))', default="A", type=str)
     parser_scrape.set_defaults(handler=command_scrape)
