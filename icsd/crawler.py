@@ -26,6 +26,8 @@ class Crawler(object):
         end = self.all_codes[self.all_codes.index(
             start) + self.max_dl-1]  # 100 is the maximum of DL
 
+        print(start, end)
+
         within_val = get_within_value(start, end)
 
         if within_val > 0:
