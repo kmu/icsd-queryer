@@ -1042,7 +1042,11 @@ class Queryer(object):
         return(r)
 
     def _parse_two_column_table(self, df):
+        if df.shape[1] != 5:
+            print(df)
+
         assert df.shape[1] == 5
+
         df1 = df.loc[:, 0:1]
         df2 = df.loc[:, 3:5]
 
