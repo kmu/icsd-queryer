@@ -81,7 +81,7 @@ class Queryer(object):
         self._url = None
         self.url = url
 
-        self.skipcif = False
+        self.skipcif = True
 
         self._query = None
         self.query = query

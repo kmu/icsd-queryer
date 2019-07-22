@@ -15,7 +15,7 @@ def command_scrape(args):
             "icsd_collection_code": args.code,
         }
         queryer = Queryer(query=query, structure_source=args.source)
-        queryer.skipcif = args.skipcif
+        queryer.skipcif = args.dlcif == False
         queryer.perform_icsd_query()
 
     if args.composition != "":
@@ -41,9 +41,9 @@ def main():
     parser_scrape.add_argument('-A', '--all', action='store_true',
                                help='scrape everything using ICSD Collection Code')
     parser_scrape.add_argument(
-        '--skipcif',
+        '--dlcif',
         action='store_true',
-        help='Do not download CIF'
+        help='Download CIF'
     )
     parser_scrape.add_argument(
         '--composition', help='e.g. Si:1 O:2', default="", type=str)
