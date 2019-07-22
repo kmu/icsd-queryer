@@ -8,7 +8,7 @@ from icsd.queryer import Queryer
 
 def command_scrape(args):
     if args.all:
-        scrape_all(args.dlcif == False)
+        scrape_all(args.dlcif == False, args.maxdl)
 
     if args.code > 0:
         query = {
@@ -47,6 +47,8 @@ def main():
     )
     parser_scrape.add_argument(
         '--composition', help='e.g. Si:1 O:2', default="", type=str)
+    parser_scrape.add_argument(
+        '--maxdl', help='Max number of downloads', default=100, type=int)
     parser_scrape.add_argument(
         '--code', help='scrape by ICSD Collection Code (e.g. 2000)', default=-1, type=int)
     parser_scrape.add_argument(
