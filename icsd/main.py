@@ -8,7 +8,7 @@ from icsd.queryer import Queryer
 
 def command_scrape(args):
     if args.all:
-        scrape_all(args.skipcif)
+        scrape_all(args.dlcif == False)
 
     if args.code > 0:
         query = {
