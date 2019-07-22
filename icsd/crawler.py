@@ -9,6 +9,7 @@ import time
 
 class Crawler(object):
     def __init__(self):
+        self.max_dl = 100
         self.skipcif = False
         logging.basicConfig(filename="selenium.log",  level=logging.INFO,
                             format='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s -> %(message)s')
@@ -23,7 +24,9 @@ class Crawler(object):
 
         start = self.not_yet_crawled[0]
         end = self.all_codes[self.all_codes.index(
-            start) + 99]  # 100 is the maximum of DL
+            start) + self.max_dl-1]  # 100 is the maximum of DL
+
+        print(start, end)
 
         within_val = get_within_value(start, end)
 
@@ -65,8 +68,8 @@ class Crawler(object):
         logging.info("Awakening...")
         self.refresh()
 
-        sleep_time = 10
-        n_at_fail = 0
+        sleep_time = 1800
+        # n_at_fail = 0
 
         while len(self.not_yet_crawled) > 0:
             try:
@@ -82,16 +85,17 @@ class Crawler(object):
                 print("Sleep {} seconds".format(sleep_time))
                 time.sleep(sleep_time)
                 sleep_time = sleep_time * 2
+                ae.cc.q.interval = ae.cc.q.interval * 2
 
-                ae.cc.q.interval += 1
+                self.max_dl = int(self.max_dl / 2)
 
                 self.refresh()
 
-                if n_at_fail - len(self.not_yet_crawled) > 1000:
-                    sleep_time = 10
-                    ae.cc.q.init_interval()
+                # if n_at_fail - len(self.not_yet_crawled) > 1000:
+                    # sleep_time = 1800
+                    # ae.cc.q.init_interval()
 
-                n_at_fail = len(self.not_yet_crawled)
+                # n_at_fail = len(self.not_yet_crawled)
 
 
 def main(skipcif=False):
