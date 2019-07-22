@@ -662,6 +662,28 @@ class Queryer(object):
 
         return(str(table))
 
+    def get_html_table_dynamic(self, keywords):
+
+        for keyword in keywords:
+
+            keyword = "</span>{}</div>".format(keyword)
+            if not self.page_obatained:
+                self.wait_for_ajax()
+                self.soup = BeautifulSoup(self.driver.page_source, 'lxml')
+                self.page_obatained = True
+
+            source = self.driver.page_source
+
+            if keyword in source:
+                table = source.split(keyword)[1]
+
+                # table = "<table" + table.split("<table")[1]
+                # table = table.split("</table>")[0] + "</table>"
+
+                return(table)
+
+        raise QueryerError
+
     # panel: "Summary"
 
     def get_PDF_number(self):
@@ -736,13 +758,15 @@ class Queryer(object):
     # panel: "Summary"
     def _get_summary_panel(self):
         table = self.get_html_table(idx=0)
+        # This cannot be replaced with dynamic one
         df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
 
     # panel: "Chemistry"
     def _get_chemistry_panel(self):
-        table = self.get_html_table(idx=2)
+        # table = self.get_html_table(idx=2)
+        table = self.get_html_table_dynamic(["Chemistry"])
         df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
@@ -856,7 +880,8 @@ class Queryer(object):
         return(raw_text.strip())
 
     def _get_published_crystal_structure_data_panel(self):
-        table = self.get_html_table(idx=3)
+        # table = self.get_html_table(idx=3)
+        table = self.get_html_table_dynamic(["Published Crystal Structure Data"])
         df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
@@ -1028,7 +1053,8 @@ class Queryer(object):
         return(df)
 
     def _get_additional_info(self, key="Warnings"):
-        table = self.get_html_table(idx=18)
+        # table = self.get_html_table(idx=18)
+        table = self.get_html_table_dynamic(["Additional information"])
 
         if '<table class="outputcontentpanel"></table>' == table:
             return([])
@@ -1184,7 +1210,8 @@ class Queryer(object):
         return('Synchrotron' == self._get_radiation_type())
 
     def _get_bibliography_panel(self):
-        table = self.get_html_table(idx=16)
+        # table = self.get_html_table(idx=16)
+        table = self.get_html_table_dynamic(["Bibliography"])
         df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
@@ -1199,7 +1226,8 @@ class Queryer(object):
         return(abstract.to_string(index=False))
 
     def _get_experimental_information_panel(self):
-        table = self.get_html_table(idx=17)
+        # table = self.get_html_table(idx=17)
+        table = self.get_html_table_dynamic(['Experimental information', 'Theoretical information'])
         df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return(df)
@@ -1378,7 +1406,8 @@ class Queryer(object):
         """
         Is the 'Structure Prototype' checkbox enabled?
         """
-        table = self.get_html_table(idx=7)
+        # table = self.get_html_table(idx=7)
+        table = self.get_html_table_dynamic(['Standardized Crystal Structure Data'])
         df = pd.read_html(table)[0]
         df = self._parse_two_column_table(df)
         return("Transformation info" in df.columns.values)
