@@ -215,3 +215,15 @@ class TestQueryer(unittest.TestCase):
             del expected_dict[key]
 
         self.assertDictEqual(expected_dict, crawled_dict)
+
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
+    def test_dynamic_table(self):
+        code = 418537
+        query = {
+            "icsd_collection_code": code,
+        }
+
+        queryer = Queryer(query=query)
+        queryer.perform_icsd_query()
+        self.assertEqual(1, queryer.hits)
+
