@@ -658,6 +658,8 @@ class Queryer(object):
 
             source = self.driver.page_source
 
+            source = source.split("Compare Published and Standardized Structure")[0]
+
             if keyword in source:
                 table = source.split(keyword)[1]
                 return(table)
@@ -1038,8 +1040,10 @@ class Queryer(object):
     def _get_additional_info(self, key="Warnings"):
         # table = self.get_html_table(idx=18)
         table = self.get_html_table_dynamic(["Additional information"])
+        print(table)
 
-        if '<table class="outputcontentpanel"></table>' == table:
+        # Blank table
+        if '<div class="displayPanelContent"><table class="outputcontentpanel"></table>' in table:
             return([])
 
         df = pd.read_html(table)[0]

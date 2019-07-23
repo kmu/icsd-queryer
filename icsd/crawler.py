@@ -98,7 +98,8 @@ class Crawler(object):
                 # n_at_fail = len(self.not_yet_crawled)
 
 
-def main(skipcif=False):
+def main(skipcif=False, maxdl=100):
     c = Crawler()
     c.skipcif = skipcif
+    c.max_dl = maxdl
     c.run()

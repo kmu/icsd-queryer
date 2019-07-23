@@ -6,3 +6,4 @@ PyVirtualDisplay
 beautifulsoup4
 pandas
 lxml
+html5lib
