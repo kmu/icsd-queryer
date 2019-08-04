@@ -38,6 +38,19 @@ class TestQueryer(unittest.TestCase):
         self.assertAlmostEqual(d1['gamma'], 90.0)
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
+    def test_exp_theory_parse(self):
+        code = 670305
+        query = {
+            "icsd_collection_code": code,
+        }
+
+        queryer = Queryer(query=query)
+        queryer.perform_icsd_query()
+        self.assertEqual(1, queryer.hits)
+
+
+
+    @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_dummy_data(self):
         queryer = Queryer()
 
@@ -164,7 +177,7 @@ class TestQueryer(unittest.TestCase):
         with open("{}/meta_data.json".format(code)) as f:
             crawled_dict = json.load(f)
 
-        assert crawled_dict['theoretical_calculation'] == True
+        assert crawled_dict['theoretical_calculation'] == False
 
     @unittest.skipIf(not is_mac, "Use macOS to run this")
     def test_theory(self):
