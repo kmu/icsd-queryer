@@ -397,6 +397,7 @@ class Queryer(object):
         self._wait_until_dialogue_disappears()
         time.sleep(3)
         self._expand_all()
+        self.driver.refresh()  # To load additional information
 
         for _ in range(1000):
             time.sleep(0.1)
