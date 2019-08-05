@@ -66,19 +66,19 @@ class Crawler(object):
 
     def run(self):
         logging.info("Awakening...")
-        # self.refresh()
+        self.refresh()
 
         sleep_time = 1800
         # n_at_fail = 0
 
         while len(self.not_yet_crawled) > 0:
             try:
-                self.refresh()
                 start, end = self.get_code_range()
 
                 ae = AllEntries(start, end)
                 ae.cc.q.skipcif = self.skipcif
                 ae.run()
+                self.refresh()
 
             except Exception as e:
                 logging.error(e)
