@@ -16,9 +16,10 @@ class CollectionCoder():
         self.code_range = "{0}-{1}".format(first_code, last_code)
         self.combined_csv_path = "combined/comb_{}.csv".format(self.code_range)
         self.each_path = "each"
+        self.structure_source = "A"
 
     def init_driver(self):
-        self.q = queryer.Queryer(structure_source="A")
+        self.q = queryer.Queryer(structure_source=self.structure_source)
         self.q.select_structure_source()
         textbox = self.q.driver.find_element_by_id(
             "content_form:uiCodeCollection:input:input")
