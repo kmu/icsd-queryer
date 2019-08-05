@@ -592,7 +592,7 @@ class Queryer(object):
                 continue
 
         parsed_data['ICSD_version'] = self._get_icsd_ver()
-        parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments']
+        parsed_data['theoretical_calculation'] = "Structure calculated theoretically" in parsed_data['comments'] or "Theoretically calculated" in parsed_data['comments']
         parsed_data['crawler_version'] = pkg_resources.get_distribution(
             "icsd").version
 
