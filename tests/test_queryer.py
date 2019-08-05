@@ -44,7 +44,7 @@ class TestQueryer(unittest.TestCase):
             "icsd_collection_code": code,
         }
 
-        queryer = Queryer(query=query)
+        queryer = Queryer(query=query, structure_source="all")
         queryer.perform_icsd_query()
         self.assertEqual(1, queryer.hits)
 
