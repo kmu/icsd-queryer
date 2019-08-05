@@ -7,6 +7,7 @@ import math
 from icsd import queryer
 from selenium.webdriver.support.ui import Select
 from tqdm import tqdm
+import pandas as pd
 
 
 class CollectionCoder():
@@ -14,6 +15,7 @@ class CollectionCoder():
         self.previous_code = 0
         self.code_range = "{0}-{1}".format(first_code, last_code)
         self.combined_csv_path = "combined/comb_{}.csv".format(self.code_range)
+        self.each_path = "each"
 
     def init_driver(self):
         self.q = queryer.Queryer(structure_source="A")
@@ -55,8 +57,8 @@ class CollectionCoder():
                     By.CSS_SELECTOR, ".ui-icon-seek-next"
                 )))
             _df = self._get_df()
-            filename = "each/{0}-p{1}outof{2}ps.csv".format(
-                self.code_range, page, n_pages)
+            filename = "{3}/{0}-p{1}outof{2}ps.csv".format(
+                self.code_range, page, n_pages, self.each_path)
             _df.to_csv(filename)
 
             df_list.append(_df)
