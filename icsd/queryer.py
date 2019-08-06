@@ -416,7 +416,14 @@ class Queryer(object):
 
             if len(folded_elements) == 0:
                 time.sleep(0.1)
-                return()
+
+                try:
+                    self.get_comments()
+                    return()
+                except:
+                    pass
+
+
 
     def _check_detailed_view(self):
         """
