@@ -272,6 +272,15 @@ class Queryer(object):
             radio_label.click()
             self._wait_until_dialogue_disappears()
 
+        if self.structure_source == 'T':
+            number_tag = tag_dict.get(self.structure_source)
+            xpath = "//table/tbody/tr/td/label["\
+                "text()[contains(., 'Experim. inorganic structures')]]"
+            radio_label = WebDriverWait(self.driver, 20).until(
+                ec.element_to_be_clickable((By.XPATH, xpath)))
+            radio_label.click()
+            self._wait_until_dialogue_disappears()
+
         if self.structure_source == 'A':
             number_tag = tag_dict.get(self.structure_source)
             xpath = "//table/tbody/tr/td/label["\
