@@ -68,7 +68,7 @@ class Crawler(object):
         logging.info("Awakening...")
         self.refresh()
 
-        sleep_time = 1800
+        sleep_time = 300
         # n_at_fail = 0
 
         while len(self.not_yet_crawled) > 0:
