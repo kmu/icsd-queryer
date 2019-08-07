@@ -421,8 +421,8 @@ class Queryer(object):
                     self.get_comments()
                     return()
                 except:
+                    print("Wait a sec...")
                     pass
-
 
 
     def _check_detailed_view(self):
